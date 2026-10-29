@@ -1,0 +1,17 @@
+{
+ "name": "Registre Vivant — démonstration",
+ "short_name": "Registre Vivant",
+ "description": "Maquette d'exploitation, unifilaires, QR codes et suivi des vérifications d'un bâtiment existant. Démonstration NT Ingénierie sur données fictives.",
+ "lang": "fr",
+ "start_url": "./",
+ "scope": "./",
+ "display": "standalone",
+ "orientation": "any",
+ "background_color": "#eef1ef",
+ "theme_color": "#18211e",
+ "icons": [
+  {"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
+  {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"},
+  {"src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+ ]
+}

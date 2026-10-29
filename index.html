@@ -1,0 +1,735 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Registre Vivant — démonstration</title>
+<meta name="description" content="Registre Vivant (NT Ingénierie) : maquette d'exploitation, unifilaires, QR codes et suivi des vérifications d'un bâtiment existant. Démonstration sur données fictives.">
+<meta name="theme-color" content="#18211e">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="fonts.css"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<style>
+/* Layout : poste d'exploitation — barre d'état en haut, arborescence | maquette 3D | fiche équipement ; une seule colonne sur téléphone */
+:root{
+  --bg:#eef1ef; --panel:#ffffff; --panel-2:#f6f8f7; --line:#d6ddd9; --fg:#18211e; --muted:#5d6b66;
+  --elec:#c9711c; --cvc:#16809a; --archi:#8b9893; --accent:#c9711c;
+  --ok:#2c7d4a; --warn:#b7791f; --crit:#bf3b28; --sel:#f2b544;
+  --scene:#e4e9e6;
+  --f-display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --f-body:"IBM Plex Sans","Segoe UI",Roboto,Arial,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#101614; --panel:#171f1c; --panel-2:#1d2622; --line:#2b3632; --fg:#e4ebe7; --muted:#93a39c;
+    --elec:#e8913a; --cvc:#35a9c4; --archi:#6f7d78; --accent:#e8913a;
+    --ok:#5cb87d; --warn:#e0a84a; --crit:#ec6a52; --sel:#ffd060; --scene:#131a18; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#101614; --panel:#171f1c; --panel-2:#1d2622; --line:#2b3632; --fg:#e4ebe7; --muted:#93a39c;
+  --elec:#e8913a; --cvc:#35a9c4; --archi:#6f7d78; --accent:#e8913a;
+  --ok:#5cb87d; --warn:#e0a84a; --crit:#ec6a52; --sel:#ffd060; --scene:#131a18; color-scheme:dark;
+}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:14px;line-height:1.45}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit}
+.app{display:flex;flex-direction:column;height:100%;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px;gap:12px}
+header.bar{display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px}
+.brand{display:flex;flex-direction:column;min-width:0}
+.brand .eyebrow{font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.brand h1{margin:0;font-family:var(--f-display);font-weight:800;font-size:22px;letter-spacing:-.01em;text-wrap:balance}
+.brand .sub{color:var(--muted);font-size:13px}
+.kpis{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:6px 12px;display:flex;flex-direction:column;min-width:96px}
+.kpi b{font-family:var(--f-display);font-size:20px;font-variant-numeric:tabular-nums}
+.kpi span{font-size:11px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.kpi.alert b{color:var(--crit)}
+.demo-tag{font-family:var(--f-mono);font-size:11px;color:var(--muted);border:1px dashed var(--line);border-radius:4px;padding:2px 6px}
+main.grid{flex:1;min-height:0;display:grid;grid-template-columns:260px minmax(0,1fr) 380px;gap:12px}
+.col{background:var(--panel);border:1px solid var(--line);border-radius:8px;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.col h2{font-family:var(--f-display);font-size:13px;letter-spacing:.06em;text-transform:uppercase;margin:0;color:var(--muted);font-weight:700}
+.sec{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--panel-2);border-radius:999px;padding:3px 10px;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.chip[aria-pressed="true"]{border-color:var(--fg);background:var(--fg);color:var(--panel)}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none}
+.tree{overflow:auto;padding:6px 6px 12px;flex:1;min-height:0}
+.tree details{margin:2px 0}
+.tree summary{cursor:pointer;padding:4px 8px;border-radius:4px;font-weight:600;font-size:13px;list-style-position:outside}
+.tree summary span{color:var(--muted);font-weight:400;font-family:var(--f-mono);font-size:11px}
+.tree ul{list-style:none;margin:0;padding:0 0 0 10px}
+.tree li button{all:unset;cursor:pointer;display:flex;align-items:center;gap:8px;width:100%;box-sizing:border-box;padding:4px 8px;border-radius:4px;font-size:13px}
+.tree li button:hover,.tree li button:focus-visible{background:var(--panel-2);outline:none}
+.tree li button[aria-current="true"]{background:color-mix(in srgb,var(--sel) 30%,transparent)}
+.tree .rep{font-family:var(--f-mono);font-size:11px;color:var(--muted);margin-left:auto;white-space:nowrap;padding-left:6px}
+.badge{font-family:var(--f-mono);font-size:10px;padding:1px 5px;border-radius:3px;background:var(--crit);color:#fff}
+.viewer{position:relative;background:var(--scene)}
+#scene{position:absolute;inset:0;display:block;width:100%;height:100%;touch-action:none}
+.hint{position:absolute;left:10px;bottom:10px;font-size:12px;color:var(--muted);background:color-mix(in srgb,var(--panel) 85%,transparent);padding:4px 8px;border-radius:4px;pointer-events:none}
+.tip{position:absolute;pointer-events:none;background:var(--panel);border:1px solid var(--line);padding:4px 8px;border-radius:4px;font-size:12px;white-space:nowrap;transform:translate(10px,10px)}
+.tools{position:absolute;right:10px;top:10px;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.section{position:absolute;right:10px;bottom:10px;background:color-mix(in srgb,var(--panel) 94%,transparent);border:1px solid var(--line);border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;gap:6px;font-size:12px;width:230px;max-width:calc(100% - 20px)}
+.section b{font-family:var(--f-display);font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.section select,.section input[type=range]{width:100%}
+.section select{font:inherit;color:var(--fg);background:var(--panel-2);border:1px solid var(--line);border-radius:4px;padding:3px}
+.section .row2{display:flex;gap:6px;flex-wrap:wrap}
+.section button{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:3px 8px;font-size:12px;cursor:pointer}
+.section .val{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.hint{max-width:calc(100% - 270px)}
+@media (max-width:560px){.hint{display:none}}
+.tools button{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer}
+.tools button:focus-visible,.chip:focus-visible,.tabs button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.tabs{display:flex;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{all:unset;cursor:pointer;padding:10px 8px;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
+.pane{overflow:auto;padding:14px;flex:1;min-height:0;display:flex;flex-direction:column;gap:14px}
+.empty{color:var(--muted);font-size:13px;display:flex;flex-direction:column;gap:8px}
+.eq-head{display:flex;flex-direction:column;gap:4px}
+.eq-head .lot{font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;gap:6px}
+.eq-head h3{margin:0;font-family:var(--f-display);font-size:20px;font-weight:700;text-wrap:balance}
+.eq-head .loc{color:var(--muted);font-size:13px}
+dl.props{display:grid;grid-template-columns:minmax(0,42%) minmax(0,1fr);margin:0;border-top:1px solid var(--line)}
+dl.props dt,dl.props dd{margin:0;padding:6px 0;border-bottom:1px solid var(--line);font-size:13px}
+dl.props dt{color:var(--muted)}
+dl.props dd{font-family:var(--f-mono);font-size:12px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.docs{display:flex;flex-direction:column;gap:6px}
+.doc{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:13px;background:var(--panel-2)}
+.doc .ext{font-family:var(--f-mono);font-size:10px;border:1px solid var(--line);border-radius:3px;padding:1px 4px;color:var(--muted)}
+.doc button{margin-left:auto;background:none;border:1px solid var(--line);border-radius:4px;padding:2px 8px;font-size:12px;cursor:pointer}
+.obs{border:1px solid var(--line);border-left:4px solid var(--warn);border-radius:6px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;background:var(--panel-2)}
+.obs.crit{border-left-color:var(--crit)}
+.obs.done{border-left-color:var(--ok);opacity:.8}
+.obs .top{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px}
+.obs .ref{font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+.pill{font-size:11px;font-weight:600;padding:1px 8px;border-radius:999px;border:1px solid currentColor}
+.pill.open{color:var(--crit)} .pill.prog{color:var(--warn)} .pill.done{color:var(--ok)}
+.obs p{margin:0;font-size:13px}
+.obs .act{font-size:12px;color:var(--muted)}
+.obs .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.obs button{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:3px 9px;font-size:12px;cursor:pointer}
+.sld{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--panel-2)}
+.sld svg{display:block}
+.qrwrap{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.qrcard{background:#fff;color:#111;border:2px solid #111;border-radius:6px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:6px;width:220px}
+.qrcard .r{font-family:var(--f-mono);font-weight:500;font-size:15px}
+.qrcard .n{font-size:11px}
+#qr img,#qr canvas{display:block}
+.url{font-family:var(--f-mono);font-size:11px;color:var(--muted);overflow-wrap:anywhere;max-width:100%}
+.reg-filters{display:flex;gap:6px;flex-wrap:wrap}
+.reg-item{cursor:pointer}
+.reg-item:hover{outline:1px solid var(--line)}
+.note{font-size:12px;color:var(--muted)}
+.rel{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--muted);margin:2px 0 12px}
+.rel>.chip{align-self:flex-start;color:var(--fg)}
+.kidgrid{display:flex;flex-wrap:wrap;gap:5px}
+.kidgrid .chip{font-family:var(--f-mono);font-size:11px;color:var(--fg)}
+details.kids{margin:0 0 4px 22px}
+details.kids summary{font-size:11px;color:var(--muted);cursor:pointer;padding:2px 0}
+figure.photo{margin:0 0 10px;border:1px solid var(--line);border-radius:6px;background:var(--panel-2);overflow:hidden}
+figure.photo img{display:block;width:100%;max-height:340px;object-fit:contain;background:#000}
+figure.photo .illus{display:block;width:100%;height:auto;max-height:260px;color:var(--fg);padding:12px 0 0}
+figure.photo figcaption{font-size:12px;color:var(--muted);padding:8px 10px;border-top:1px solid var(--line)}
+.filebtn{color:var(--fg)}
+.linkbtn{all:unset;cursor:pointer;color:var(--fg);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
+.linkbtn:hover,.linkbtn:focus-visible{text-decoration-color:var(--fg)}
+.roomlist{padding:8px 0 0;overflow:visible;flex:none}
+.roomlist ul{padding:0}
+h2.sub{font-family:var(--f-display);font-size:13px;letter-spacing:.06em;text-transform:uppercase;margin:10px 0 4px;color:var(--muted)}
+h2.sub span{font-family:var(--f-mono);font-weight:400}
+.foot{font-size:11px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap}
+@media (max-width:1100px){ main.grid{grid-template-columns:220px minmax(0,1fr) 330px} }
+@media (max-width:860px){
+  html,body{height:auto}
+  .app{height:auto}
+  main.grid{display:flex;flex-direction:column}
+  .viewer{height:58vh;min-height:320px;order:1}
+  .col.side{order:2}
+  .col.left{order:3;max-height:420px}
+  .kpis{margin-left:0}
+}
+@media (prefers-reduced-motion: reduce){ *{transition:none!important;animation:none!important} }
+</style>
+
+<div class="app">
+  <header class="bar">
+    <div class="brand">
+      <span class="eyebrow">ERP type R · 3e catégorie · 2 niveaux + toiture</span>
+      <h1>Groupe scolaire Les Tilleuls</h1>
+      <span class="sub">Maquette d'exploitation électricité et CVC <span class="demo-tag">démonstration · données fictives</span></span>
+    </div>
+    <div class="kpis" id="kpis"></div>
+  </header>
+
+  <main class="grid">
+    <section class="col left" aria-label="Arborescence">
+      <div class="sec">
+        <h2>Lots</h2>
+        <div class="chips" id="lots"></div>
+      </div>
+      <div class="sec">
+        <h2>Niveaux</h2>
+        <div class="chips" id="levels"></div>
+      </div>
+      <div class="tree" id="tree"></div>
+    </section>
+
+    <section class="col viewer" aria-label="Maquette 3D">
+      <canvas id="scene" aria-label="Vue 3D de la maquette"></canvas>
+      <div class="tools">
+        <button id="b-reset" type="button">Vue d'ensemble</button>
+        <button id="b-xray" type="button" aria-pressed="true">Architecture en transparence</button>
+        <button id="b-labels" type="button" aria-pressed="true">Noms des locaux</button>
+      </div>
+      <div class="section" id="section" aria-label="Coupe">
+        <b>Coupe</b>
+        <label for="sec-mode" class="sr" style="display:none">Type de coupe</label>
+        <select id="sec-mode"><option value="none">Pas de coupe</option><option value="h">Coupe horizontale (niveau)</option><option value="l">Coupe longitudinale</option><option value="t">Coupe transversale</option></select>
+        <input type="range" id="sec-pos" min="0" max="100" step="0.1" value="50" aria-label="Position de la coupe" disabled>
+        <div class="row2"><span>Position : <span class="val" id="sec-val">—</span></span></div>
+        <div class="row2"><button type="button" id="sec-inv" disabled>Inverser</button><button type="button" data-cut="1.6" data-only="RDC">Plan RDC</button><button type="button" data-cut="5.2" data-only="R1">Plan R+1</button></div>
+      </div>
+      <div class="hint">Glisser pour tourner · molette ou pincer pour zoomer · cliquer sur un équipement ou sur le sol d'un local</div>
+      <div class="tip" id="tip" hidden></div>
+    </section>
+
+    <section class="col side" aria-label="Fiche">
+      <div class="tabs" role="tablist" id="tabs">
+        <button role="tab" id="t-fiche" aria-selected="true" data-tab="fiche" type="button">Fiche</button>
+        <button role="tab" id="t-photo" aria-selected="false" data-tab="photo" type="button">Photo</button>
+        <button role="tab" id="t-sld" aria-selected="false" data-tab="sld" type="button">Unifilaire</button>
+        <button role="tab" id="t-verif" aria-selected="false" data-tab="verif" type="button">Vérifications</button>
+        <button role="tab" id="t-qr" aria-selected="false" data-tab="qr" type="button">QR code</button>
+        <button role="tab" id="t-reg" aria-selected="false" data-tab="reg" type="button">Registre</button>
+      </div>
+      <div class="pane" id="pane"></div>
+    </section>
+  </main>
+  <div class="foot">
+    <span>Maquette IFC 4 · classes et identifiants IFC sur chaque objet</span>
+    <span>Statuts des observations enregistrés dans ce navigateur uniquement (démo)</span>
+    <span>Registre Vivant · NT Ingénierie · <a href="mailto:be-tce@nt-ing.fr?subject=Registre%20Vivant%20-%20d%C3%A9monstration" style="color:inherit">be-tce@nt-ing.fr</a> · 01 89 16 87 90</span>
+  </div>
+</div>
+
+<script src="lib/three.min.js"></script>
+<script src="lib/OrbitControls.js"></script>
+<script src="lib/qrcode.min.js"></script>
+<script>
+(function(){
+"use strict";
+const ARTIFACT_URL = location.origin + location.pathname;
+const H = 3.6; // hauteur d'étage
+const LEVELS = [
+  {id:"RDC", name:"Rez-de-chaussée", z:0},
+  {id:"R1", name:"Étage R+1", z:H},
+  {id:"TT", name:"Toiture-terrasse", z:2*H}
+];
+const LOTS = {
+  ELEC:{name:"Électricité", color:"--elec"},
+  CVC:{name:"CVC", color:"--cvc"},
+  ARCHI:{name:"Architecture", color:"--archi"}
+};
+// Locaux (plan : x 0→40 m, y 0→16 m ; couloir central y 7→9)
+const ROOMS = [
+  ["RDC","Classe 1",0,0,10,7],["RDC","Classe 2",10,0,20,7],["RDC","Classe 3",20,0,28,7],["RDC","Chaufferie",28,0,34,7],["RDC","Local TGBT",34,0,40,7],
+  ["RDC","Circulation RDC",0,7,40,9],
+  ["RDC","Hall / accueil",0,9,10,16],["RDC","Restaurant scolaire",10,9,25,16],["RDC","Cuisine",25,9,32,16],["RDC","Sanitaires RDC",32,9,40,16],
+  ["R1","Classe 4",0,0,10,7],["R1","Classe 5",10,0,20,7],["R1","Classe 6",20,0,30,7],["R1","Classe 7",30,0,40,7],
+  ["R1","Circulation R+1",0,7,40,9],
+  ["R1","Salle informatique",0,9,10,16],["R1","BCD",10,9,20,16],["R1","Classe 8",20,9,30,16],["R1","Sanitaires R+1",30,9,40,16]
+];
+
+// ---------- Équipements ----------
+const gid = (s)=>{const c="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_$";let h=2166136261;for(const ch of s){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)>>>0}let o="";for(let i=0;i<22;i++){h=Math.imul(h^(h>>>13),2654435761)>>>0;o+=c[h%64]}return o};
+const EQ = [];
+function eq(o){o.guid=gid(o.id);o.parts=o.parts||[];EQ.push(o);return o}
+
+eq({id:"TGBT",rep:"TGBT",name:"Tableau général basse tension",lot:"ELEC",ifc:"IfcElectricDistributionBoard",level:"RDC",room:"Local TGBT",
+  parts:[{b:[35.2,6.3,0,37.8,6.9,2.0]}],
+  props:{"Arrivée":"Tarif jaune 144 kVA · 400 V TT","Interrupteur général":"INS 400 A","Icc estimé au JDB":"8,4 kA","Indice de protection":"IP30 / IK07","Forme":"Forme 2","Année de pose":"1998, modifiée 2011 et 2019","Note de calcul":"NF C 15-100 · 2026-05 · conforme"},
+  circuits:[["Q1","NSX 160","100 A","TM-D","4×35 mm²","TD-RDC"],["Q2","NSX 160","125 A","TM-D","4×50 mm²","TD-R1"],["Q3","NSX 100","80 A","TM-D","4×25 mm²","TD-CUISINE"],["Q4","NSX 100","63 A","TM-D","4×16 mm²","TD-CHAUFF"],["Q5","NSX 100","40 A","TM-D","4×10 mm²","TD-CTA"],["Q6","iC60","16 A","C","3G2,5 mm²","CMSI / ECS"]],
+  icc:"Icc max 8,4 kA",
+  obs:[{ref:"OBS-2026-01",g:"crit",t:"Schéma unifilaire de l'armoire absent ou ne correspondant pas à l'installation (départs Q5 et Q6 non représentés).",a:"Reconstitution de l'unifilaire et affichage via QR code.",s:"done"},
+       {ref:"OBS-2026-02",g:"warn",t:"Repérage des départs incomplet sur le jeu de barres aval.",a:"Étiquetage gravé des départs Q1 à Q6.",s:"prog"}]});
+eq({id:"TD-RDC",rep:"TD-RDC",name:"Tableau divisionnaire RDC",lot:"ELEC",ifc:"IfcElectricDistributionBoard",level:"RDC",room:"Circulation RDC",
+  parts:[{b:[14.5,6.75,0.6,15.5,7.0,2.0]}],
+  props:{"Alimentation":"TGBT / Q1 · 4×35 mm² · 32 m","Protection de tête":"NSX 160 · 100 A","Différentiel":"30 mA type A par rangée","Icc au tableau":"4,1 kA","Chute de tension":"1,9 % (≤ 3 % éclairage)","Indice de protection":"IP40"},
+  circuits:[["D1","iC60","16 A","C","3G1,5 mm²","Éclairage classes 1-2"],["D2","iC60","16 A","C","3G1,5 mm²","Éclairage classe 3 + circ."],["D3","iC60","20 A","C","3G2,5 mm²","PC classes 1-2"],["D4","iC60","20 A","C","3G2,5 mm²","PC classe 3"],["D5","iC60","16 A","C","3G2,5 mm²","Hall / accueil"],["D6","iC60","10 A","C","3G1,5 mm²","BAES RDC"]],
+  icc:"Icc 4,1 kA",
+  obs:[{ref:"OBS-2026-03",g:"crit",t:"Dispositif différentiel 30 mA de la rangée 2 sans déclenchement au bouton test.",a:"Remplacement de l'interrupteur différentiel, essai consigné.",s:"open"},
+       {ref:"OBS-2026-04",g:"warn",t:"Obturateurs manquants sur deux emplacements libres.",a:"Pose d'obturateurs.",s:"done"}]});
+eq({id:"TD-R1",rep:"TD-R1",name:"Tableau divisionnaire R+1",lot:"ELEC",ifc:"IfcElectricDistributionBoard",level:"R1",room:"Circulation R+1",
+  parts:[{b:[14.5,6.75,H+0.6,15.5,7.0,H+2.0]}],
+  props:{"Alimentation":"TGBT / Q2 · 4×50 mm² · 41 m","Protection de tête":"NSX 160 · 125 A","Différentiel":"30 mA type A par rangée","Icc au tableau":"3,6 kA","Chute de tension":"2,3 %","Indice de protection":"IP40"},
+  circuits:[["D1","iC60","16 A","C","3G1,5 mm²","Éclairage classes 4-5"],["D2","iC60","16 A","C","3G1,5 mm²","Éclairage classes 6-7"],["D3","iC60","20 A","C","3G2,5 mm²","PC classes 4-7"],["D4","iC60","32 A","C","3G6 mm²","Salle informatique"],["D5","iC60","16 A","C","3G1,5 mm²","BCD + classe 8"],["D6","iC60","10 A","C","3G1,5 mm²","BAES R+1"]],
+  icc:"Icc 3,6 kA",
+  obs:[{ref:"OBS-2026-05",g:"crit",t:"Aucun schéma présent dans le tableau.",a:"Unifilaire reconstitué sur photos, QR code posé en porte.",s:"done"},
+       {ref:"OBS-2026-06",g:"warn",t:"Échauffement anormal à la borne du départ D4 (thermographie : +38 K).",a:"Resserrage et contrôle de la section ; vérifier la charge salle informatique.",s:"open"}]});
+eq({id:"TD-CUISINE",rep:"TD-CUIS",name:"Tableau divisionnaire cuisine",lot:"ELEC",ifc:"IfcElectricDistributionBoard",level:"RDC",room:"Cuisine",
+  parts:[{b:[31.3,14.5,0.6,31.6,15.5,2.0]}],
+  props:{"Alimentation":"TGBT / Q3 · 4×25 mm² · 18 m","Protection de tête":"NSX 100 · 80 A","Indice de protection":"IP55 (local humide)","Icc au tableau":"5,2 kA"},
+  circuits:[["C1","iC60","32 A","C","5G6 mm²","Four mixte"],["C2","iC60","20 A","C","5G2,5 mm²","Lave-vaisselle"],["C3","iC60","16 A","C","3G2,5 mm²","Chambre froide"],["C4","iC60","16 A","C","3G1,5 mm²","Éclairage cuisine"]],
+  icc:"Icc 5,2 kA", obs:[]});
+eq({id:"TD-CHAUFF",rep:"TD-CH",name:"Tableau chaufferie",lot:"ELEC",ifc:"IfcElectricDistributionBoard",level:"RDC",room:"Chaufferie",
+  parts:[{b:[28.3,0.4,0.6,28.6,1.4,2.0]}],
+  props:{"Alimentation":"TGBT / Q4 · 4×16 mm² · 9 m","Protection de tête":"NSX 100 · 63 A","Arrêt d'urgence":"Coup de poing extérieur au local","Indice de protection":"IP55"},
+  circuits:[["H1","GV2","6,3 A","moteur","4G1,5 mm²","Circulateur réseau Nord"],["H2","GV2","6,3 A","moteur","4G1,5 mm²","Circulateur réseau Sud"],["H3","iC60","10 A","C","3G1,5 mm²","Chaudière 1"],["H4","iC60","10 A","C","3G1,5 mm²","Chaudière 2"],["H5","iC60","10 A","C","3G1,5 mm²","Régulation"]],
+  icc:"Icc 6,0 kA",
+  obs:[{ref:"OBS-2026-07",g:"warn",t:"Arrêt d'urgence extérieur de la chaufferie non signalé.",a:"Pose d'une plaque de signalisation.",s:"open"}]});
+eq({id:"TD-CTA",rep:"TD-CTA",name:"Coffret toiture CTA",lot:"ELEC",ifc:"IfcElectricDistributionBoard",level:"TT",room:"Toiture-terrasse",
+  parts:[{b:[29.0,3.0,2*H,29.3,3.8,2*H+1.2]}],
+  props:{"Alimentation":"TGBT / Q5 · 4×10 mm² · 26 m","Protection de tête":"NSX 100 · 40 A","Indice de protection":"IP65 extérieur"},
+  circuits:[["V1","GV2","10 A","moteur","4G2,5 mm²","Ventilateur soufflage"],["V2","GV2","10 A","moteur","4G2,5 mm²","Ventilateur reprise"],["V3","iC60","16 A","C","3G2,5 mm²","Batterie électrique appoint"]],
+  icc:"Icc 2,8 kA", obs:[]});
+eq({id:"CDC-RDC",rep:"CDC-RDC",name:"Chemin de câbles circulation RDC",lot:"ELEC",ifc:"IfcCableCarrierSegment",level:"RDC",room:"Circulation RDC",
+  parts:[{b:[1,7.9,3.0,38,8.2,3.08]},{b:[37.6,6.4,2.0,37.9,7.9,3.08]}],
+  props:{"Type":"Dalle perforée 300 × 60 mm","Taux de remplissage":"42 %","Réserve":"Oui (≥ 30 %)","Hauteur de pose":"3,00 m sous faux plafond"}, obs:[]});
+eq({id:"CDC-R1",rep:"CDC-R1",name:"Chemin de câbles circulation R+1",lot:"ELEC",ifc:"IfcCableCarrierSegment",level:"R1",room:"Circulation R+1",
+  parts:[{b:[1,7.9,H+3.0,38,8.2,H+3.08]},{b:[37.6,7.9,3.08,37.9,8.2,H+3.0]}],
+  props:{"Type":"Dalle perforée 200 × 60 mm","Taux de remplissage":"55 %","Réserve":"Limite","Traversée de plancher":"Calfeutrée coupe-feu 1 h"},
+  obs:[{ref:"OBS-2026-08",g:"warn",t:"Calfeutrement coupe-feu de la traversée de plancher à reprendre après passage d'un câble neuf.",a:"Reprise du calfeutrement, photo au dossier.",s:"open"}]});
+eq({id:"SSI",rep:"CMSI",name:"Centralisateur de mise en sécurité incendie",lot:"ELEC",ifc:"IfcAlarm",level:"RDC",room:"Hall / accueil",
+  parts:[{b:[0.3,14.6,1.0,0.5,15.4,1.8]}],
+  props:{"Catégorie SSI":"A","Zones de détection":"8","Zones d'alarme":"2","Dernier essai":"2026-09-15 · conforme"}, obs:[]});
+// Éclairage : ensembles par niveau
+function lumGrid(level,z,rooms){const parts=[];rooms.forEach(([x0,y0,x1,y1])=>{const nx=Math.max(2,Math.round((x1-x0)/4)),ny=2;for(let i=0;i<nx;i++)for(let j=0;j<ny;j++){const cx=x0+(i+.5)*(x1-x0)/nx,cy=y0+(j+.5)*(y1-y0)/ny;parts.push({b:[cx-.6,cy-.3,z+3.15,cx+.6,cy+.3,z+3.2],lum:1})}});return parts}
+eq({id:"ECL-RDC",rep:"ECL-RDC",name:"Éclairage des classes RDC",lot:"ELEC",ifc:"IfcLightFixture",level:"RDC",room:"Classes 1 à 3",
+  parts:lumGrid("RDC",0,[[0,0,10,7],[10,0,20,7],[20,0,28,7]]),
+  props:{"Luminaires":"Dalles LED 600 × 600 · 36 W","Éclairement moyen":"312 lx (≥ 300 lx)","Commande":"Détection de présence + gradation","Circuits":"TD-RDC / D1, D2"}, obs:[]});
+eq({id:"ECL-R1",rep:"ECL-R1",name:"Éclairage des classes R+1",lot:"ELEC",ifc:"IfcLightFixture",level:"R1",room:"Classes 4 à 7",
+  parts:lumGrid("R1",H,[[0,0,10,7],[10,0,20,7],[20,0,30,7],[30,0,40,7]]),
+  props:{"Luminaires":"Tubes fluorescents T8 2×58 W (origine)","Éclairement moyen":"248 lx (< 300 lx)","Commande":"Interrupteurs","Circuits":"TD-R1 / D1, D2"}, obs:[]});
+eq({id:"BAES",rep:"BAES",name:"Éclairage de sécurité (BAES)",lot:"ELEC",ifc:"IfcLightFixture",level:"RDC",room:"Circulations RDC et R+1",
+  parts:[3,11,19,27,35].flatMap(x=>[{b:[x-.2,8.95,2.3,x+.2,9.0,2.45]},{b:[x-.2,8.95,H+2.3,x+.2,9.0,H+2.45]}]),
+  props:{"Blocs":"10 BAES évacuation 45 lm, SATI","Autonomie":"1 h","Dernier test":"2026-09-15"}, obs:[]});
+// CVC
+eq({id:"CH-1",rep:"CH-1",name:"Chaudière gaz à condensation n° 1",lot:"CVC",ifc:"IfcBoiler",level:"RDC",room:"Chaufferie",
+  parts:[{b:[29.5,3.8,0,30.9,5.2,1.9]}],
+  props:{"Puissance utile":"180 kW","Énergie":"Gaz naturel","Rendement PCI":"108 % (30 %)","Mise en service":"2014","Entretien annuel":"2026-09-02"},
+  obs:[{ref:"OBS-2026-11",g:"warn",t:"Plaque de rinçage du conduit de fumées non accessible.",a:"Déplacer le stockage devant la trappe.",s:"done"}]});
+eq({id:"CH-2",rep:"CH-2",name:"Chaudière gaz à condensation n° 2",lot:"CVC",ifc:"IfcBoiler",level:"RDC",room:"Chaufferie",
+  parts:[{b:[31.6,3.8,0,33.0,5.2,1.9]}],
+  props:{"Puissance utile":"180 kW","Énergie":"Gaz naturel","Mise en service":"2014","Entretien annuel":"2026-09-02"}, obs:[]});
+eq({id:"RES-CH",rep:"RES-CH",name:"Réseau de chauffage (départ / retour)",lot:"CVC",ifc:"IfcPipeSegment",level:"RDC",room:"Circulations",
+  parts:[{b:[1,7.35,2.7,30,7.5,2.85]},{b:[1,7.6,2.7,30,7.75,2.85]},{b:[1,7.35,H+2.7,30,7.5,H+2.85]},{b:[1,7.6,H+2.7,30,7.75,H+2.85]},{b:[29.6,7.35,1.9,29.75,7.5,H+2.85]}],
+  props:{"Régime":"70 / 50 °C","Diamètre principal":"DN 65 acier","Calorifuge":"Laine minérale 30 mm","Circulateurs":"2 × vitesse variable"}, obs:[]});
+eq({id:"RAD",rep:"RAD",name:"Émetteurs (radiateurs) des classes",lot:"CVC",ifc:"IfcSpaceHeater",level:"RDC",room:"Classes 1 à 8",
+  parts:[0,1].flatMap(l=>[2,6,12,16,22,26,32,36].filter(x=>l===1||x<28).map(x=>({b:[x-.8,0.15,l*H+0.2,x+.8,0.3,l*H+0.8]}))),
+  props:{"Type":"Radiateurs acier à panneaux","Robinets":"Thermostatiques","Équilibrage":"Non documenté"}, obs:[]});
+eq({id:"CTA",rep:"CTA-01",name:"Centrale de traitement d'air double flux",lot:"CVC",ifc:"IfcUnitaryEquipment",level:"TT",room:"Toiture-terrasse",
+  parts:[{b:[30,2,2*H,36,4.6,2*H+1.8]}],
+  props:{"Débit":"6 500 m³/h","Récupération":"Échangeur rotatif · 78 %","Filtres":"ePM1 55 % / ePM10 50 %","Batterie":"Eau chaude + appoint électrique","Dernier entretien":"2026-03-10"},
+  obs:[{ref:"OBS-2026-12",g:"warn",t:"Filtres de soufflage colmatés (perte de charge au-delà de la valeur de remplacement).",a:"Remplacement des filtres, relevé au carnet d'entretien.",s:"prog"}]});
+eq({id:"GAINES",rep:"GA-SOU",name:"Gaines de soufflage",lot:"CVC",ifc:"IfcDuctSegment",level:"R1",room:"Circulations et gaine technique",
+  parts:[{b:[33,4.6,2*H,34,5.6,2*H+0.6]},{b:[33,7.0,0.4,34,8.0,2*H+0.6]},{b:[2,8.3,H+3.1,33,8.9,H+3.45]},{b:[2,8.3,3.1,33,8.9,3.45]}],
+  props:{"Section principale":"600 × 350 mm","Matériau":"Acier galvanisé, isolé","Clapets coupe-feu":"4 (CF-01 à CF-04)"},
+  obs:[{ref:"OBS-2026-13",g:"crit",t:"Clapet coupe-feu CF-03 non réarmé après essai.",a:"Réarmement et essai de commande depuis le CMSI.",s:"open"}]});
+eq({id:"EXT-CUIS",rep:"EXT-01",name:"Tourelle d'extraction cuisine",lot:"CVC",ifc:"IfcFan",level:"TT",room:"Toiture-terrasse",
+  parts:[{b:[27,12,2*H,28.2,13.2,2*H+1.1]}],
+  props:{"Débit":"3 200 m³/h","Type":"Tourelle 400 °C / 2 h","Asservissement":"Hotte cuisine"}, obs:[]});
+// Objets unitaires : chaque luminaire, bloc BAES et radiateur a sa propre fiche
+const pad=n=>String(n).padStart(2,"0");
+function roomAt(lv,x,y){const r=ROOMS.find(([l,n,x0,y0,x1,y1])=>l===lv&&x>=x0&&x<=x1&&y>=y0&&y<=y1);return r?r[1]:"—"}
+function explode(gid,prefix,mk){
+  const g=EQ.find(e=>e.id===gid);
+  g.kids=g.parts.map((p,i)=>{const lv=partLevel(p),room=roomAt(lv,(p.b[0]+p.b[3])/2,(p.b[1]+p.b[4])/2);
+    const d=mk(p,i,room,lv);
+    return eq({id:gid+"-"+pad(i+1),rep:prefix+"-"+pad(i+1),name:d.name,lot:g.lot,ifc:g.ifc,level:lv,room,parent:gid,kind:d.kind,parts:[p],props:d.props,obs:d.obs||[]}).id});
+  g.kind=EQ.find(q=>q.id===g.kids[0]).kind; g.parts=[]; g.props=Object.assign({"Nombre d'objets":String(g.kids.length)},g.props);
+}
+let c6=0;
+explode("ECL-RDC","L-RDC",(p,i,room)=>({kind:"dalle",name:"Dalle LED · "+room,
+  props:{"Type":"Dalle LED 600 × 600 encastrée","Puissance":"36 W","Flux":"4 000 lm · 4 000 K","Circuit":room==="Classe 3"?"TD-RDC / D2":"TD-RDC / D1","Commande":"Détection de présence + gradation","Hauteur de pose":"3,15 m (faux plafond)","Mise en service":"2019","État":"Bon"}}));
+explode("ECL-R1","L-R1",(p,i,room)=>{const o=[];
+  if(room==="Classe 6"&&c6<2){c6++;o.push({ref:c6===1?"OBS-2026-09":"OBS-2026-14",g:"warn",t:"Continuité du conducteur de protection (PE) non assurée sur ce luminaire.",a:"Reprise du conducteur PE et mesure de continuité.",s:"open"})}
+  return {kind:"t8",name:"Luminaire T8 2×58 W · "+room,obs:o,
+  props:{"Type":"Réglette fluorescente T8 2 × 58 W","Puissance":"2 × 58 W + ballast ferromagnétique","Circuit":(room==="Classe 4"||room==="Classe 5")?"TD-R1 / D1":"TD-R1 / D2","Commande":"Interrupteur","Hauteur de pose":"3,20 m","Mise en service":"1998 (origine)","État":"Vieillissant · passage LED conseillé"}}});
+explode("BAES","BAES",(p,i,room,lv)=>{const o=[];
+  if(lv==="R1"&&(i===3||i===7))o.push({ref:i===3?"OBS-2026-10":"OBS-2026-15",g:"crit",t:"Bloc hors service : autonomie insuffisante à l'essai.",a:"Remplacement du bloc, essai consigné au registre.",s:"done"});
+  return {kind:"baes",name:"Bloc BAES évacuation · "+room,obs:o,
+  props:{"Type":"BAES évacuation 45 lm, SATI","Autonomie":"1 h","Circuit":lv==="RDC"?"TD-RDC / D6":"TD-R1 / D6","Hauteur de pose":"2,30 m","Dernier test":"2026-09-15","État":o.length?"Remplacé le 2026-03-20":"Bon"}}});
+explode("RAD","RAD",(p,i,room)=>({kind:"rad",name:"Radiateur · "+room,
+  props:{"Type":"Radiateur acier à panneaux","Puissance":"1 500 W (estimée, régime 70/50 °C)","Robinet":"Thermostatique","Réseau":"RES-CH","Équilibrage":"Non documenté"}}));
+const byId = Object.fromEntries(EQ.map(e=>[e.id,e]));
+const members=e=>e.kids?e.kids.map(k=>byId[k]):[e];
+const allParts=e=>members(e).flatMap(m=>m.parts);
+const obsOf=e=>members(e).flatMap(m=>m.obs);
+// photos (enregistrées dans ce navigateur pour la démo)
+const PHKEY="jumeau-tilleuls-photos-v1";
+let photos={}; try{photos=JSON.parse(localStorage.getItem(PHKEY)||"{}")||{}}catch(e){photos={}}
+
+// ---------- État ----------
+const KEY="jumeau-tilleuls-v1";
+let saved={};
+try{saved=JSON.parse(localStorage.getItem(KEY)||"{}")||{}}catch(e){saved={}}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(saved))}catch(e){}};
+EQ.forEach(e=>e.obs.forEach(o=>{o.eq=e.id;if(saved[o.ref])o.s=saved[o.ref]}));
+const ALLOBS=()=>EQ.flatMap(e=>e.obs);
+const state={lots:{ELEC:true,CVC:true,ARCHI:true},levels:{RDC:true,R1:true,TT:true},sel:null,room:null,tab:"fiche",xray:true,regFilter:"open",labels:true};
+
+// ---------- Couleurs ----------
+const css=(v)=>getComputedStyle(document.documentElement).getPropertyValue(v).trim()||"#888";
+const col=(v)=>new THREE.Color(css(v));
+
+// ---------- Scène ----------
+const canvas=document.getElementById("scene");
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(40,1,0.1,500);
+const controls=new THREE.OrbitControls(camera,canvas);
+controls.enableDamping=true; controls.dampingFactor=.08; controls.maxPolarAngle=Math.PI*0.495;
+const C0={pos:new THREE.Vector3(-20,36,54),target:new THREE.Vector3(20,3,8)};
+camera.position.copy(C0.pos); controls.target.copy(C0.target);
+scene.add(new THREE.HemisphereLight(0xffffff,0x667766,0.85));
+const sun=new THREE.DirectionalLight(0xffffff,0.65); sun.position.set(-20,40,30); scene.add(sun);
+
+// plan → three : (x, y_plan, z) -> (x, z, y_plan)
+function box(b,mat){const [x0,y0,z0,x1,y1,z1]=b;const g=new THREE.BoxGeometry(Math.abs(x1-x0)||.02,Math.abs(z1-z0)||.02,Math.abs(y1-y0)||.02);const m=new THREE.Mesh(g,mat);m.position.set((x0+x1)/2,(z0+z1)/2,(y0+y1)/2);return m}
+const pickables=[]; const archi={RDC:[],R1:[],TT:[]};
+const matCache={};
+function eqMat(lot){return new THREE.MeshStandardMaterial({color:col(LOTS[lot].color),roughness:.55,metalness:.1,emissive:0x000000})}
+// architecture
+const slabMat=new THREE.MeshStandardMaterial({color:col("--archi"),transparent:true,opacity:.18,roughness:1,depthWrite:false});
+const wallMat=new THREE.MeshStandardMaterial({color:col("--archi"),transparent:true,opacity:.14,roughness:1,depthWrite:false,side:THREE.DoubleSide});
+const edgeMat=new THREE.LineBasicMaterial({color:col("--archi"),transparent:true,opacity:.55});
+LEVELS.forEach(L=>{
+  const s=box([0,0,L.z-0.2,40,16,L.z],slabMat); s.userData.archi=true; scene.add(s); archi[L.id].push(s);
+});
+const roomArchi=ROOMS.map(()=>[]), roomFloors=[];
+ROOMS.forEach(([lv,name,x0,y0,x1,y1],ri)=>{
+  const z=LEVELS.find(l=>l.id===lv).z;
+  const fl=box([x0+.08,y0+.08,z+0.01,x1-.08,y1-.08,z+0.03],new THREE.MeshBasicMaterial({color:col("--sel"),transparent:true,opacity:0,depthWrite:false}));
+  fl.userData.room=ri; scene.add(fl); roomFloors.push(fl);
+  const pts=[[x0,y0],[x1,y0],[x1,y1],[x0,y1]];
+  for(let i=0;i<4;i++){const [a,b]=[pts[i],pts[(i+1)%4]];
+    const w=box([Math.min(a[0],b[0]),Math.min(a[1],b[1]),z,Math.max(a[0],b[0])+(a[0]===b[0]?.15:0),Math.max(a[1],b[1])+(a[1]===b[1]?.15:0),z+3.3],wallMat);
+    scene.add(w); archi[lv].push(w); roomArchi[ri].push(w);
+    const e=new THREE.LineSegments(new THREE.EdgesGeometry(w.geometry),edgeMat); e.position.copy(w.position); scene.add(e); archi[lv].push(e); roomArchi[ri].push(e);
+  }
+});
+// noms des locaux (IfcSpace) : étiquette posée au sol, nom + surface
+const roomLabels=[];
+function labelSprite(name,area){
+  const c=document.createElement("canvas"); const k=2; c.width=640*k; c.height=150*k; const g=c.getContext("2d"); g.scale(k,k);
+  g.font="600 46px Archivo, Arial, sans-serif"; const w1=g.measureText(name).width; g.font="400 34px 'IBM Plex Mono', monospace"; const t2=area+" m²"; const w2=g.measureText(t2).width;
+  const w=Math.min(620,Math.max(w1,w2)+40); const x0=(640-w)/2;
+  g.fillStyle="rgba(255,255,255,0.88)"; g.strokeStyle="rgba(24,33,30,0.35)"; g.lineWidth=3;
+  g.beginPath(); if(g.roundRect) g.roundRect(x0,8,w,134,18); else g.rect(x0,8,w,134); g.fill(); g.stroke();
+  g.fillStyle="#18211e"; g.textAlign="center"; g.font="600 46px Archivo, Arial, sans-serif"; g.fillText(name,320,66,600);
+  g.fillStyle="#5d6b66"; g.font="400 34px 'IBM Plex Mono', monospace"; g.fillText(t2,320,118);
+  const tex=new THREE.CanvasTexture(c); tex.anisotropy=4;
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false,depthTest:false}));
+  sp.renderOrder=10; return sp;
+}
+ROOMS.forEach(([lv,name,x0,y0,x1,y1])=>{
+  const z=LEVELS.find(l=>l.id===lv).z; const area=Math.round((x1-x0)*(y1-y0));
+  const sp=labelSprite(name,area); const sc=Math.min(8,Math.max(5.5,(x1-x0)*0.85));
+  sp.userData.base=sc; sp.scale.set(sc,sc*150/640,1); sp.position.set((x0+x1)/2,z+0.6,(y0+y1)/2); sp.userData.level=lv; sp.userData.room=roomLabels.length;
+  scene.add(sp); roomLabels.push(sp);
+});
+// équipements
+const groups={};
+EQ.forEach(e=>{
+  const g=new THREE.Group(); g.userData.eq=e.id;
+  const mat=eqMat(e.lot); e._mat=mat;
+  e.parts.forEach(p=>{const m=box(p.b,mat);m.userData.eq=e.id;g.add(m);pickables.push(m)});
+  scene.add(g); groups[e.id]=g;
+});
+function levelOf(e){return e.level}
+function partLevel(p){const z=p.b[2];return z>=2*H-0.01?"TT":z>=H-0.01?"R1":"RDC"}
+
+// isolement d'un local : équipements dont la position tombe dans le local
+function inRoom(e,p,i){const [lv,name,x0,y0,x1,y1]=ROOMS[i];if(e.kids||partLevel(p)!==lv)return false;
+  if(e.parent||!/Segment/.test(e.ifc))return e.room===name;
+  return p.b[0]<x1-.05&&p.b[3]>x0+.05&&p.b[1]<y1-.05&&p.b[4]>y0+.05}
+const roomEq=i=>EQ.filter(e=>e.parts.some(p=>inRoom(e,p,i)));
+const roomIdx=(lv,name)=>ROOMS.findIndex(r=>r[0]===lv&&r[1]===name);
+function applyVisibility(){
+  if(state.room!=null){const ri=state.room;
+    LEVELS.forEach(L=>archi[L.id].forEach(o=>o.visible=false)); roomArchi[ri].forEach(o=>o.visible=state.lots.ARCHI);
+    roomFloors.forEach((f,i)=>{f.material.opacity=i===ri?.22:0});
+    EQ.forEach(e=>{groups[e.id].children.forEach((m,i)=>{m.visible=state.lots[e.lot]&&inRoom(e,e.parts[i],ri)})});
+    wallMat.opacity=state.xray?.14:.55; slabMat.opacity=state.xray?.18:.6; wallMat.depthWrite=slabMat.depthWrite=!state.xray;
+    roomLabels.forEach(l=>{l.visible=state.labels&&l.userData.room===ri});
+    return}
+  roomFloors.forEach(f=>{f.material.opacity=0});
+  LEVELS.forEach(L=>archi[L.id].forEach(o=>o.visible=state.lots.ARCHI&&state.levels[L.id]));
+  EQ.forEach(e=>{groups[e.id].children.forEach((m,i)=>{m.visible=state.lots[e.lot]&&state.levels[partLevel(e.parts[i])]})});
+  wallMat.opacity=state.xray?.14:.55; slabMat.opacity=state.xray?.18:.6;
+  wallMat.depthWrite=slabMat.depthWrite=!state.xray;
+  roomLabels.forEach(l=>{l.visible=state.labels&&state.lots.ARCHI&&state.levels[l.userData.level]&&(typeof sec==="undefined"||!sec.on||sec.plane.distanceToPoint(l.position)>=0)});
+}
+function themeColors(){
+  scene.background=col("--scene");
+  [slabMat,wallMat].forEach(m=>m.color=col("--archi")); edgeMat.color=col("--archi");
+  EQ.forEach(e=>{e._mat.color=col(LOTS[e.lot].color)});
+  highlight();
+}
+function highlight(){
+  EQ.forEach(e=>{e._mat.emissive=new THREE.Color(0x000000);e._mat.emissiveIntensity=0});
+  if(state.sel){members(byId[state.sel]).forEach(q=>{q._mat.emissive=col("--sel");q._mat.emissiveIntensity=.55})}
+}
+function resize(){const r=canvas.parentElement.getBoundingClientRect();renderer.setSize(r.width,r.height,false);camera.aspect=r.width/Math.max(1,r.height);camera.updateProjectionMatrix()}
+new ResizeObserver(resize).observe(canvas.parentElement); resize();
+
+// animation caméra
+let anim=null;
+function flyTo(pos,target){anim={p0:camera.position.clone(),t0:controls.target.clone(),p1:pos,t1:target,k:0}}
+const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+function focusEq(id){
+  const bb=new THREE.Box3(); members(byId[id]).forEach(q=>bb.expandByObject(groups[q.id])); const c=bb.getCenter(new THREE.Vector3()); const s=bb.getSize(new THREE.Vector3()).length();
+  const d=Math.max(13,s*1.4); const pos=c.clone().add(new THREE.Vector3(-d*.55,d*.6,d*.75));
+  if(reduce){camera.position.copy(pos);controls.target.copy(c)}else flyTo(pos,c);
+}
+(function loop(){requestAnimationFrame(loop);
+  if(anim){anim.k=Math.min(1,anim.k+0.045);const t=1-Math.pow(1-anim.k,3);camera.position.lerpVectors(anim.p0,anim.p1,t);controls.target.lerpVectors(anim.t0,anim.t1,t);if(anim.k>=1)anim=null}
+  roomLabels.forEach(l=>{if(!l.visible)return;const s=Math.min(l.userData.base,camera.position.distanceTo(l.position)*0.16);l.scale.set(s,s*150/640,1)});
+  controls.update(); renderer.render(scene,camera)})();
+
+// sélection
+const ray=new THREE.Raycaster(), mouse=new THREE.Vector2(); const tip=document.getElementById("tip");
+function pick(ev){const r=canvas.getBoundingClientRect();mouse.x=((ev.clientX-r.left)/r.width)*2-1;mouse.y=-((ev.clientY-r.top)/r.height)*2+1;ray.setFromCamera(mouse,camera);const hit=ray.intersectObjects(pickables.filter(m=>m.visible),false).find(h=>!sec.on||sec.plane.distanceToPoint(h.point)>=-0.01);return hit?hit.object.userData.eq:null}
+function pickRoom(ev){const r=canvas.getBoundingClientRect();mouse.x=((ev.clientX-r.left)/r.width)*2-1;mouse.y=-((ev.clientY-r.top)/r.height)*2+1;ray.setFromCamera(mouse,camera);
+  const cand=roomFloors.filter(f=>state.room!=null?f.userData.room===state.room:state.lots.ARCHI&&state.levels[ROOMS[f.userData.room][0]]).concat(roomLabels.filter(l=>l.visible));
+  const hit=ray.intersectObjects(cand,false).find(h=>!sec.on||sec.plane.distanceToPoint(h.point)>=-0.01);return hit?hit.object.userData.room:null}
+let down=null;
+canvas.addEventListener("pointerdown",e=>{down={x:e.clientX,y:e.clientY}});
+canvas.addEventListener("pointerup",e=>{if(!down)return;const moved=Math.hypot(e.clientX-down.x,e.clientY-down.y)>5;down=null;if(moved)return;const id=pick(e);if(id){select(id,{fly:false});return}const rm=pickRoom(e);if(rm!=null&&rm!==state.room)openRoom(rm)});
+canvas.addEventListener("pointermove",e=>{if(e.pointerType!=="mouse")return;const id=pick(e);if(id){const q=byId[id];tip.textContent=q.rep+" · "+q.name;const r=canvas.getBoundingClientRect();tip.style.left=(e.clientX-r.left)+"px";tip.style.top=(e.clientY-r.top)+"px";tip.hidden=false;canvas.style.cursor="pointer"}else{const rm=state.room==null?pickRoom(e):null;if(rm!=null){tip.textContent=ROOMS[rm][1]+" · cliquer pour isoler le local";const r=canvas.getBoundingClientRect();tip.style.left=(e.clientX-r.left)+"px";tip.style.top=(e.clientY-r.top)+"px";tip.hidden=false;canvas.style.cursor="pointer"}else{tip.hidden=true;canvas.style.cursor=""}}});
+canvas.addEventListener("pointerleave",()=>{tip.hidden=true});
+
+// ---------- UI ----------
+const $=(s)=>document.querySelector(s);
+const esc=(s)=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));
+const openCount=(arr)=>arr.filter(o=>o.s!=="done").length;
+function renderKpis(){
+  const all=ALLOBS(); const open=openCount(all); const crit=all.filter(o=>o.s!=="done"&&o.g==="crit").length;
+  $("#kpis").innerHTML=
+   `<div class="kpi"><b>${EQ.filter(e=>!e.kids).length}</b><span>Objets suivis</span></div>`+
+   `<div class="kpi ${open?"alert":""}"><b>${open}</b><span>Observations ouvertes</span></div>`+
+   `<div class="kpi ${crit?"alert":""}"><b>${crit}</b><span>dont critiques</span></div>`+
+   `<div class="kpi"><b>12/03/26</b><span>Dernière vérif.</span></div>`;
+}
+function renderChips(){
+  $("#lots").innerHTML=Object.entries(LOTS).map(([k,l])=>`<button class="chip" type="button" data-lot="${k}" aria-pressed="${state.lots[k]}"><i class="dot" style="background:var(${l.color})"></i>${l.name}</button>`).join("");
+  $("#levels").innerHTML=LEVELS.map(L=>`<button class="chip" type="button" data-lv="${L.id}" aria-pressed="${state.levels[L.id]}">${L.id==="R1"?"R+1":L.id==="TT"?"Toiture":"RDC"}</button>`).join("");
+}
+function renderTree(){
+  const html=LEVELS.map(L=>{
+    const items=EQ.filter(e=>e.level===L.id&&!e.parent);
+    const btn=(e,k)=>{const n=openCount(obsOf(e));return `<button type="button" data-eq="${e.id}" aria-current="${state.sel===e.id}"><i class="dot" style="background:var(${LOTS[k].color})"></i>${esc(e.kids?e.name:e.parent?e.room:e.name)}${n?` <span class="badge" title="Observations ouvertes">${n}</span>`:""}<span class="rep">${esc(e.rep)}</span></button>`};
+    const lots=["ELEC","CVC"].map(k=>{const its=items.filter(e=>e.lot===k);if(!its.length)return"";
+      return `<details open><summary>${LOTS[k].name} <span>${its.length}</span></summary><ul>${its.map(e=>{
+        if(!e.kids)return `<li>${btn(e,k)}</li>`;
+        const ks=members(e); const op=ks.some(q=>q.id===state.sel);
+        return `<li>${btn(e,k)}<details class="kids" ${op?"open":""}><summary>${ks.length} objets unitaires</summary><ul>${ks.map(q=>`<li>${btn(q,k)}</li>`).join("")}</ul></details></li>`}).join("")}</ul></details>`}).join("");
+    return `<details open><summary>${L.name}</summary>${lots}</details>`}).join("");
+  $("#tree").innerHTML=html;
+}
+function setTab(t){state.tab=t;document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.tab===t)));renderPane()}
+
+function obsHtml(o,withEq){
+  const st={open:["open","À lever"],prog:["prog","En cours"],done:["done","Levée"]}[o.s];
+  const e=byId[o.eq];
+  return `<div class="obs ${o.s==="done"?"done":o.g==="crit"?"crit":""} ${withEq?"reg-item":""}" ${withEq?`data-goto="${o.eq}"`:""}>
+    <div class="top"><span class="ref">${o.ref}</span><span class="pill ${st[0]}">${st[1]}</span>${o.g==="crit"&&o.s!=="done"?`<span class="pill open">Prioritaire</span>`:""}${withEq?`<span class="ref">${esc(e.rep)} · ${esc(e.room)}</span>`:""}</div>
+    <p>${esc(o.t)}</p><div class="act">Action : ${esc(o.a)}</div>
+    ${withEq?"":`<div class="row"><button type="button" data-st="${o.ref}" data-v="${o.s==="done"?"open":"done"}">${o.s==="done"?"Rouvrir":"Marquer levée"}</button>${o.s==="open"?`<button type="button" data-st="${o.ref}" data-v="prog">Passer en cours</button>`:""}</div>`}
+  </div>`;
+}
+
+function sldSvg(e){
+  const fg=css("--fg"),mu=css("--muted"),ac=css("--elec");
+  const n=e.circuits.length, w=Math.max(360,70+n*92), h=330, bx=50, by=110, step=(w-100)/Math.max(1,n-1);
+  let s=`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" font-family="IBM Plex Mono, monospace" font-size="10">`;
+  s+=`<text x="${bx}" y="18" fill="${fg}" font-size="12" font-weight="600">${esc(e.rep)} · ${esc(e.name)}</text>`;
+  s+=`<text x="${bx}" y="34" fill="${mu}">${esc(e.props["Alimentation"]||e.props["Arrivée"]||"")}</text>`;
+  const cx=w/2;
+  s+=`<line x1="${cx}" y1="44" x2="${cx}" y2="${by}" stroke="${fg}" stroke-width="2"/>`;
+  s+=`<rect x="${cx-9}" y="62" width="18" height="24" fill="none" stroke="${fg}" stroke-width="1.5"/><line x1="${cx-9}" y1="86" x2="${cx+9}" y2="62" stroke="${fg}"/>`;
+  s+=`<text x="${cx+16}" y="78" fill="${fg}">${esc(e.props["Interrupteur général"]||e.props["Protection de tête"]||"")}</text>`;
+  s+=`<text x="${cx+16}" y="92" fill="${mu}">${esc(e.icc||"")}</text>`;
+  s+=`<line x1="${bx-10}" y1="${by}" x2="${w-bx+10}" y2="${by}" stroke="${ac}" stroke-width="4"/>`;
+  e.circuits.forEach((c,i)=>{const x=n===1?cx:bx+i*step;
+    s+=`<line x1="${x}" y1="${by}" x2="${x}" y2="${by+110}" stroke="${fg}" stroke-width="1.5"/>`;
+    s+=`<rect x="${x-7}" y="${by+22}" width="14" height="22" fill="none" stroke="${fg}" stroke-width="1.3"/><line x1="${x-7}" y1="${by+44}" x2="${x+7}" y2="${by+22}" stroke="${fg}"/>`;
+    s+=`<text x="${x}" y="${by+16}" fill="${fg}" text-anchor="middle" font-weight="600">${esc(c[0])}</text>`;
+    s+=`<text x="${x}" y="${by+60}" fill="${fg}" text-anchor="middle">${esc(c[1])}</text>`;
+    s+=`<text x="${x}" y="${by+73}" fill="${fg}" text-anchor="middle">${esc(c[2])} ${esc(c[3])}</text>`;
+    s+=`<text x="${x}" y="${by+86}" fill="${mu}" text-anchor="middle">${esc(c[4])}</text>`;
+    s+=`<polygon points="${x-4},${by+110} ${x+4},${by+110} ${x},${by+118}" fill="${fg}"/>`;
+    const lbl=c[5]; const words=lbl.split(" "); let l1="",l2="";words.forEach(wd=>{(l1+" "+wd).trim().length<=13&&!l2?l1=(l1+" "+wd).trim():l2=(l2+" "+wd).trim()});
+    s+=`<text x="${x}" y="${by+134}" fill="${fg}" text-anchor="middle">${esc(l1)}</text>`;
+    if(l2)s+=`<text x="${x}" y="${by+147}" fill="${fg}" text-anchor="middle">${esc(l2)}</text>`;
+    if(byId[lbl]) s+=`<text x="${x}" y="${by+162}" fill="${ac}" text-anchor="middle">→ voir</text>`;
+  });
+  s+=`<text x="${bx}" y="${h-10}" fill="${mu}">Reconstitué d'après photos de l'armoire · rév. A · 2026-05</text>`;
+  return s+"</svg>";
+}
+
+// ---------- Photos ----------
+function savePhotos(){try{localStorage.setItem(PHKEY,JSON.stringify(photos));return true}catch(e){return false}}
+function addPhoto(id,file){
+  const url=URL.createObjectURL(file); const img=new Image();
+  img.onload=()=>{const M=1000,k=Math.min(1,M/Math.max(img.width,img.height));const c=document.createElement("canvas");c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);
+    c.getContext("2d").drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);
+    photos[id]={d:c.toDataURL("image/jpeg",0.78),dt:new Date().toLocaleDateString("fr-FR")};
+    const ok=savePhotos(); renderPane(); if(!ok){const m=$("#ph-msg");if(m)m.textContent="Photo affichée, mais le navigateur n'a plus de place pour la garder : elle disparaîtra au rechargement."}};
+  img.onerror=()=>{URL.revokeObjectURL(url);const m=$("#ph-msg");if(m)m.textContent="Ce fichier n'a pas pu être lu comme une image."};
+  img.src=url;
+}
+// illustration du type d'équipement quand aucune photo n'existe encore
+function illus(e){
+  const A=`var(${LOTS[e.lot].color})`, S=`stroke="currentColor" stroke-width="2" fill="none"`, P=`style="fill:var(--panel-2)"`;
+  const k=e.kind||e.ifc; let g="";
+  if(k==="dalle") g=`<path d="M70 70 L250 70 L280 140 L40 140 Z" ${P} ${S}/><path d="M86 80 L234 80 L258 130 L62 130 Z" style="fill:${A};opacity:.25" stroke="none"/><path d="M160 70 L160 140 M55 105 L265 105" stroke="currentColor" stroke-opacity=".35"/>`;
+  else if(k==="t8") g=`<rect x="40" y="80" width="240" height="44" rx="4" ${P} ${S}/><rect x="52" y="90" width="216" height="9" rx="4.5" style="fill:${A};opacity:.55"/><rect x="52" y="105" width="216" height="9" rx="4.5" style="fill:${A};opacity:.55"/>`;
+  else if(k==="baes") g=`<rect x="95" y="62" width="130" height="76" rx="6" ${P} ${S}/><rect x="108" y="74" width="104" height="44" rx="3" style="fill:var(--ok)"/><path d="M128 96 h40 m-12 -10 l12 10 l-12 10" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="196" cy="128" r="3.5" style="fill:var(--ok)"/>`;
+  else if(k==="rad") g=`<rect x="50" y="62" width="220" height="86" rx="4" ${P} ${S}/>${Array.from({length:13},(_,i)=>`<line x1="${66+i*15.5}" y1="70" x2="${66+i*15.5}" y2="140" stroke="${A}" stroke-width="5" stroke-opacity=".5"/>`).join("")}<circle cx="280" cy="140" r="7" ${S}/>`;
+  else if(k==="IfcElectricDistributionBoard") g=`<rect x="100" y="20" width="120" height="160" rx="3" ${P} ${S}/>${[0,1,2,3].map(r=>`<rect x="112" y="${36+r*34}" width="96" height="22" rx="2" style="fill:${A};opacity:.18"/>${Array.from({length:8},(_,i)=>`<rect x="${115+i*11.6}" y="${39+r*34}" width="8" height="16" rx="1" style="fill:${A};opacity:.7"/>`).join("")}`).join("")}`;
+  else if(k==="IfcBoiler") g=`<rect x="110" y="20" width="100" height="160" rx="6" ${P} ${S}/><rect x="128" y="40" width="64" height="26" rx="3" style="fill:${A};opacity:.35"/><circle cx="160" cy="120" r="22" ${S}/><path d="M160 108 c10 12 -10 14 0 24" stroke="${A}" stroke-width="3" fill="none"/>`;
+  else if(k==="IfcUnitaryEquipment") g=`<rect x="30" y="60" width="260" height="90" rx="4" ${P} ${S}/><line x1="117" y1="60" x2="117" y2="150" stroke="currentColor" stroke-opacity=".4"/><line x1="203" y1="60" x2="203" y2="150" stroke="currentColor" stroke-opacity=".4"/><circle cx="74" cy="105" r="28" stroke="${A}" stroke-width="3" fill="none"/><circle cx="246" cy="105" r="28" stroke="${A}" stroke-width="3" fill="none"/><path d="M135 80 h50 M135 95 h50 M135 110 h50 M135 125 h50" stroke="${A}" stroke-opacity=".6"/>`;
+  else if(k==="IfcFan") g=`<path d="M110 160 L120 80 L200 80 L210 160 Z" ${P} ${S}/><path d="M100 80 Q160 30 220 80 Z" ${P} ${S}/><circle cx="160" cy="120" r="20" stroke="${A}" stroke-width="3" fill="none"/>`;
+  else g=`<rect x="70" y="60" width="180" height="90" rx="6" ${P} ${S}/><circle cx="160" cy="105" r="18" style="fill:${A};opacity:.5"/>`;
+  return `<svg class="illus" viewBox="0 0 320 200" role="img" aria-label="Illustration du type d'équipement ${esc(e.rep)}">${g}<text x="160" y="194" text-anchor="middle" font-size="11" style="fill:var(--muted)" font-family="IBM Plex Mono, monospace">${esc(e.ifc)}</text></svg>`;
+}
+
+function renderPane(){
+  const p=$("#pane"); const e=state.sel?byId[state.sel]:null; const t=state.tab;
+  if(t==="reg"){
+    const f=state.regFilter; const list=ALLOBS().filter(o=>f==="all"?true:f==="done"?o.s==="done":o.s!=="done").sort((a,b)=>(a.g==="crit"?0:1)-(b.g==="crit"?0:1));
+    p.innerHTML=`<div class="eq-head"><span class="lot">Registre de sécurité · électricité et CVC</span><h3>Observations du rapport de vérification</h3><span class="loc">Vérification périodique du 12/03/2026 · organisme agréé (fictif)</span></div>
+      <div class="reg-filters">${[["open","À lever"],["done","Levées"],["all","Toutes"]].map(([k,l])=>`<button class="chip" type="button" data-reg="${k}" aria-pressed="${f===k}">${l}</button>`).join("")}</div>
+      ${list.map(o=>obsHtml(o,true)).join("")||`<div class="empty">Aucune observation dans ce filtre.</div>`}`;
+    return;
+  }
+  if(!e&&state.room!=null){
+    const [lv,name,x0,y0,x1,y1]=ROOMS[state.room]; const list=roomEq(state.room); const op=openCount(list.flatMap(q=>q.obs));
+    const sect=k=>{const its=list.filter(q=>q.lot===k);if(!its.length)return"";return `<h2 class="sub">${LOTS[k].name} <span>${its.length}</span></h2><ul>${its.map(q=>{const n=openCount(q.obs);return `<li><button type="button" data-eq="${q.id}"><i class="dot" style="background:var(${LOTS[k].color})"></i>${esc(q.parent?q.name.split(" · ")[0]:q.name)}${n?` <span class="badge">${n}</span>`:""}${photos[q.id]?` <span class="note" title="Photo disponible">photo</span>`:""}<span class="rep">${esc(q.rep)}</span></button></li>`}).join("")}</ul>`};
+    p.innerHTML=`<div class="eq-head"><span class="lot">Local · IfcSpace</span><h3>${esc(name)}</h3><span class="loc">${esc(LEVELS.find(l=>l.id===lv).name)} · ${Math.round((x1-x0)*(y1-y0))} m²</span></div>
+      <div class="rel"><button class="chip" type="button" data-roomexit="1">Quitter le local · revenir au bâtiment</button></div>
+      <dl class="props"><dt>Surface</dt><dd>${Math.round((x1-x0)*(y1-y0))} m²</dd><dt>Dimensions</dt><dd>${String(x1-x0).replace(".",",")} × ${String(y1-y0).replace(".",",")} m</dd><dt>Hauteur libre</dt><dd>3,30 m</dd><dt>Objets suivis</dt><dd>${list.length}</dd><dt>Observations ouvertes</dt><dd>${op}</dd></dl>
+      <div class="tree roomlist">${sect("ELEC")+sect("CVC")||`<div class="empty">Aucun équipement suivi dans ce local.</div>`}</div>`;
+    return;
+  }
+  if(!e){
+    p.innerHTML=`<div class="empty"><div class="eq-head"><span class="lot">Aucun équipement sélectionné</span><h3>Choisissez un équipement</h3></div>
+      <p>Cliquez sur un objet de la maquette ou de l'arborescence : sa fiche, son unifilaire, ses observations et son QR code s'affichent ici.</p>
+      <p>Pour commencer : <button class="chip" type="button" data-eq="TD-R1">TD-R1 · tableau R+1</button> <button class="chip" type="button" data-eq="CTA">CTA-01 · centrale d'air</button></p>
+      <p>L'onglet Registre liste toutes les observations du dernier rapport de vérification.</p></div>`;
+    return;
+  }
+  const head=`<div class="eq-head"><span class="lot" style="color:var(${LOTS[e.lot].color})"><i class="dot" style="background:var(${LOTS[e.lot].color})"></i>${LOTS[e.lot].name} · ${esc(e.rep)}</span><h3>${esc(e.name)}</h3><span class="loc">${esc(LEVELS.find(l=>l.id===e.level).name)} · ${roomIdx(e.level,e.room)>=0?`<button class="linkbtn" type="button" data-room="${roomIdx(e.level,e.room)}" title="Isoler ce local">${esc(e.room)}</button>`:esc(e.room)}</span></div>`+(state.room!=null?`<div class="rel"><button class="chip" type="button" data-room="${state.room}">← Retour au local ${esc(ROOMS[state.room][1])}</button></div>`:"");
+  if(t==="fiche"){
+    const props=Object.entries(e.props).concat([["Classe IFC",e.ifc],["GlobalId IFC",e.guid]]);
+    const docs=[];
+    if(e.circuits)docs.push(["Schéma unifilaire","SVG","sld"]);
+    docs.push([photos[e.id]?"Photo de l'équipement":"Photo de l'équipement (à prendre)","JPG","photo"]);
+    if(e.lot==="ELEC"&&e.ifc==="IfcElectricDistributionBoard")docs.push(["Note de calcul NF C 15-100","PDF",""]);
+    if(e.kind==="dalle"||e.kind==="t8"||e.kind==="baes")docs.push(["Fiche technique fabricant","PDF",""]);
+    if(e.lot==="CVC")docs.push(["Notice constructeur","PDF",""],["Carnet d'entretien","PDF",""]);
+    docs.push(["Rapport de vérification 2026","PDF","verif"]);
+    const rel=e.parent?`<div class="rel">Fait partie de <button class="chip" type="button" data-eq="${e.parent}">${esc(byId[e.parent].rep)} · ${esc(byId[e.parent].name)}</button></div>`
+      :e.kids?`<div class="rel"><span>Objets unitaires (${e.kids.length}) : chacun a sa fiche, sa photo et son QR code</span><div class="kidgrid">${members(e).map(q=>{const n=openCount(q.obs);return `<button class="chip" type="button" data-eq="${q.id}">${esc(q.rep)}${n?` <span class="badge">${n}</span>`:""}</button>`}).join("")}</div></div>`:"";
+    p.innerHTML=head+rel+`<dl class="props">${props.map(([k,v])=>`<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>
+      <div class="docs"><h2 style="font-family:var(--f-display);font-size:13px;letter-spacing:.06em;text-transform:uppercase;margin:0;color:var(--muted)">Documents liés</h2>
+      ${docs.map(([n,x,go])=>`<div class="doc"><span class="ext">${x}</span>${esc(n)}${go?`<button type="button" data-tabgo="${go}">Ouvrir</button>`:`<span class="note" style="margin-left:auto">exemple</span>`}</div>`).join("")}</div>`;
+  } else if(t==="sld"){
+    if(!e.circuits){const src=String(e.props["Circuit"]||e.props["Circuits"]||"").split(" ")[0];const bd=byId[src]&&byId[src].circuits?src:"TGBT";
+      p.innerHTML=head+`<div class="empty">Pas d'unifilaire propre à cet objet. ${src&&bd===src?`Il est alimenté par ${esc(e.props["Circuit"]||e.props["Circuits"])} :`:"Les unifilaires sont rattachés aux tableaux électriques :"} <button class="chip" type="button" data-eq="${bd}">${esc(byId[bd].rep)}</button></div>`;return}
+    p.innerHTML=head+`<div class="sld">${sldSvg(e)}</div><p class="note">Les départs qui alimentent un autre tableau ouvrent ce tableau d'un clic dans l'arborescence.</p>`;
+  } else if(t==="verif"){
+    const ol=obsOf(e);
+    p.innerHTML=head+(ol.length?ol.map(o=>obsHtml(o,!!e.kids)).join(""):`<div class="empty">Aucune observation sur cet équipement lors de la vérification du 12/03/2026.</div>`);
+  } else if(t==="photo"){
+    const ph=photos[e.id];
+    p.innerHTML=head+`<figure class="photo">${ph?`<img src="${ph.d}" alt="Photo de ${esc(e.rep)} sur site">`:illus(e)}
+      <figcaption>${ph?`Photo du ${esc(ph.dt)} · enregistrée dans ce navigateur`:`Illustration du type d'équipement · pas encore de photo du site`}</figcaption></figure>
+      <div class="row"><label class="chip filebtn" tabindex="0">${ph?"Remplacer la photo":"Prendre ou ajouter une photo"}<input type="file" accept="image/*" capture="environment" id="ph-in" hidden></label>${ph?`<button class="chip" type="button" id="ph-del">Supprimer la photo</button>`:""}</div>
+      <p class="note" id="ph-msg">Sur téléphone, le bouton ouvre l'appareil photo : le technicien photographie l'équipement sur place et la photo reste attachée à sa fiche. Dans cette démo, elle est gardée dans ton navigateur uniquement.</p>`;
+    $("#ph-in").addEventListener("change",ev=>{const f=ev.target.files&&ev.target.files[0];if(f)addPhoto(e.id,f)});
+    const lb=$(".filebtn");lb.addEventListener("keydown",ev=>{if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();$("#ph-in").click()}});
+    if(ph)$("#ph-del").addEventListener("click",()=>{delete photos[e.id];savePhotos();renderPane();renderTree()});
+  } else if(t==="qr"){
+    const url=ARTIFACT_URL+"#"+e.id;
+    p.innerHTML=head+`<div class="qrwrap"><div class="qrcard"><div id="qr"></div><div class="r">${esc(e.rep)}</div><div class="n">${esc(e.name)}</div><div class="n">Scanner pour ouvrir la fiche à jour</div></div>
+      <div class="url">${esc(url)}</div><button class="chip" type="button" id="b-copy">Copier le lien</button>
+      <p class="note">Étiquette à coller sur la porte de l'armoire ou sur l'équipement. Le lien ouvre directement cette fiche, sur téléphone comme sur poste fixe.</p></div>`;
+    try{new QRCode(document.getElementById("qr"),{text:url,width:168,height:168,correctLevel:QRCode.CorrectLevel.M})}catch(err){$("#qr").textContent="QR indisponible"}
+    $("#b-copy").addEventListener("click",ev=>{const b=ev.currentTarget;navigator.clipboard.writeText(url).then(()=>{b.textContent="Lien copié"}).catch(()=>{const r=document.createRange();r.selectNodeContents($(".url"));const sel=getSelection();sel.removeAllRanges();sel.addRange(r);b.textContent="Lien sélectionné"})});
+  }
+}
+
+function openRoom(i){state.room=i;state.sel=null;if(sec.mode!=="none"){sec.mode="h";sec.inv=false;$("#sec-mode").value="h";$("#sec-pos").value="100";applySection()}tip.hidden=true;canvas.style.cursor="";if(state.tab==="reg")state.tab="fiche";
+  const [lv,name,x0,y0,x1,y1]=ROOMS[i];const z=LEVELS.find(l=>l.id===lv).z;const c=new THREE.Vector3((x0+x1)/2,z+1.2,(y0+y1)/2);const d=Math.max(9,Math.hypot(x1-x0,y1-y0)*1.15);
+  const pos=c.clone().add(new THREE.Vector3(-d*.35,d*.8,d*.6));
+  applyVisibility();highlight();renderTree();setTab(state.tab);reduce?(camera.position.copy(pos),controls.target.copy(c)):flyTo(pos,c)}
+function leaveRoomTo(lv){state.room=null;state.sel=null;Object.keys(state.levels).forEach(k=>state.levels[k]=(k===lv));renderChips();
+  if(sec.mode==="h"){$("#sec-pos").value="100";applySection()}
+  applyVisibility();highlight();renderTree();renderPane();
+  const z=LEVELS.find(l=>l.id===lv).z,pos=new THREE.Vector3(-14,z+34,44),tg=new THREE.Vector3(20,z,8);reduce?(camera.position.copy(pos),controls.target.copy(tg)):flyTo(pos,tg)}
+function exitRoom(){const lv=ROOMS[state.room][0];state.room=null;state.sel=null;applyVisibility();highlight();renderTree();renderPane();
+  reduce?(camera.position.copy(C0.pos),controls.target.copy(C0.target)):flyTo(C0.pos.clone(),C0.target.clone())}
+function select(id,opt){opt=opt||{};state.sel=id;const e=byId[id];
+  if(state.room!=null&&!members(e).some(m=>m.parts.some(p=>inRoom(m,p,state.room))))state.room=null;
+  if(!state.lots[e.lot]){state.lots[e.lot]=true}
+  allParts(e).forEach(p=>{state.levels[partLevel(p)]=true});
+  renderChips();applyVisibility();highlight();renderTree();
+  if(state.tab==="reg")state.tab="fiche";
+  setTab(opt.tab||state.tab);
+  if(opt.fly!==false)focusEq(id);
+}
+
+document.addEventListener("click",ev=>{
+  const b=ev.target.closest("button"); if(!b)return;
+  if(b.dataset.room!==undefined){openRoom(Number(b.dataset.room));return}
+  if(b.dataset.roomexit){exitRoom();return}
+  if(b.dataset.lot){state.lots[b.dataset.lot]=!state.lots[b.dataset.lot];renderChips();applyVisibility()}
+  else if(b.dataset.lv){if(state.room!=null){leaveRoomTo(b.dataset.lv);return}state.levels[b.dataset.lv]=!state.levels[b.dataset.lv];renderChips();applyVisibility()}
+  else if(b.dataset.eq){select(b.dataset.eq)}
+  else if(b.dataset.tab){setTab(b.dataset.tab)}
+  else if(b.dataset.tabgo){setTab(b.dataset.tabgo)}
+  else if(b.dataset.reg){state.regFilter=b.dataset.reg;renderPane()}
+  else if(b.dataset.st){const o=ALLOBS().find(x=>x.ref===b.dataset.st);o.s=b.dataset.v;saved[o.ref]=o.s;save();renderPane();renderTree();renderKpis()}
+});
+document.addEventListener("click",ev=>{const it=ev.target.closest("[data-goto]");if(it&&!ev.target.closest("button"))select(it.dataset.goto,{tab:"verif"})});
+$("#b-reset").addEventListener("click",()=>{state.sel=null;state.room=null;applyVisibility();highlight();renderTree();if(state.tab!=="reg")renderPane();reduce?(camera.position.copy(C0.pos),controls.target.copy(C0.target)):flyTo(C0.pos.clone(),C0.target.clone())});
+
+// ---------- coupe ----------
+const sec={on:false,mode:"none",inv:false,plane:new THREE.Plane(new THREE.Vector3(0,-1,0),0)};
+const SEC_RANGE={h:[0,2*H+2.2,"m (hauteur)"],l:[0,16,"m (profondeur)"],t:[0,40,"m (longueur)"]};
+function applySection(){
+  const m=sec.mode, inp=$("#sec-pos");
+  if(m==="none"){sec.on=false;renderer.clippingPlanes=[];inp.disabled=true;$("#sec-inv").disabled=true;$("#sec-val").textContent="—";applyVisibility();return}
+  const [a,b,u]=SEC_RANGE[m]; const v=a+(b-a)*Number(inp.value)/100; const k=sec.inv?-1:1;
+  if(m==="h") sec.plane.set(new THREE.Vector3(0,-k,0),k*v);
+  else if(m==="l") sec.plane.set(new THREE.Vector3(0,0,-k),k*v);
+  else sec.plane.set(new THREE.Vector3(k,0,0),-k*v);
+  sec.on=true; renderer.clippingPlanes=[sec.plane]; inp.disabled=false; $("#sec-inv").disabled=false;
+  $("#sec-val").textContent=v.toFixed(2).replace(".",",")+" "+u;
+  applyVisibility();
+}
+$("#sec-mode").addEventListener("change",ev=>{sec.mode=ev.target.value;if(sec.mode==="none"){Object.keys(state.levels).forEach(k=>state.levels[k]=true);renderChips()}sec.inv=false;$("#sec-pos").value=sec.mode==="h"?30:50;applySection()});
+$("#sec-pos").addEventListener("input",applySection);
+$("#sec-inv").addEventListener("click",()=>{sec.inv=!sec.inv;applySection()});
+document.querySelectorAll("[data-cut]").forEach(b=>b.addEventListener("click",()=>{const y=Number(b.dataset.cut);if(state.room!=null){state.room=null;state.sel=null;highlight();renderTree();renderPane()}Object.keys(state.levels).forEach(k=>state.levels[k]=(k===b.dataset.only));renderChips();sec.mode="h";sec.inv=false;$("#sec-mode").value="h";$("#sec-pos").value=String(y/SEC_RANGE.h[1]*100);applySection();
+  const pos=new THREE.Vector3(20,y+52,8.01),tg=new THREE.Vector3(20,y-2,8);reduce?(camera.position.copy(pos),controls.target.copy(tg)):flyTo(pos,tg)}));
+document.addEventListener("keydown",ev=>{if(ev.key==="Escape"&&state.room!=null&&!ev.target.closest("input,select,textarea"))exitRoom()});
+$("#b-labels").addEventListener("click",ev=>{state.labels=!state.labels;ev.currentTarget.setAttribute("aria-pressed",String(state.labels));applyVisibility()});
+$("#b-xray").addEventListener("click",ev=>{state.xray=!state.xray;ev.currentTarget.setAttribute("aria-pressed",String(state.xray));applyVisibility()});
+
+// thème
+themeColors();
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>{themeColors();renderPane()});
+new MutationObserver(()=>{themeColors();renderPane()}).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+
+renderKpis();renderChips();renderTree();applyVisibility();
+const h=(location.hash||"").replace("#","");
+if(byId[h]) select(h); else { state.sel="TD-R1"; highlight(); renderTree(); renderPane(); }
+window.addEventListener("hashchange",()=>{const k=location.hash.replace("#","");if(byId[k])select(k)});
+})();
+</script>
+
+<script>if("serviceWorker" in navigator&&location.protocol.startsWith("http")){navigator.serviceWorker.register("sw.js").then(r=>r.update()).catch(()=>{});}</script>
+</body></html>
