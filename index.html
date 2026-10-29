@@ -10,7 +10,7 @@
 /* Layout : poste d'exploitation — barre d'état en haut, arborescence | maquette 3D | fiche équipement ; une seule colonne sur téléphone */
 :root{
   --bg:#eef1ef; --panel:#ffffff; --panel-2:#f6f8f7; --line:#d6ddd9; --fg:#18211e; --muted:#5d6b66;
-  --elec:#c9711c; --cvc:#16809a; --archi:#8b9893; --accent:#c9711c;
+  --elec:#c9711c; --cvc:#16809a; --cfa:#7a55b0; --ssi:#c2362b; --plb:#2a68b0; --archi:#8b9893; --accent:#c9711c;
   --ok:#2c7d4a; --warn:#b7791f; --crit:#bf3b28; --sel:#f2b544;
   --scene:#e4e9e6;
   --f-display:"Archivo","Helvetica Neue",Arial,sans-serif;
@@ -20,13 +20,13 @@
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#101614; --panel:#171f1c; --panel-2:#1d2622; --line:#2b3632; --fg:#e4ebe7; --muted:#93a39c;
-    --elec:#e8913a; --cvc:#35a9c4; --archi:#6f7d78; --accent:#e8913a;
+    --elec:#e8913a; --cvc:#35a9c4; --cfa:#a98be0; --ssi:#ef6b5b; --plb:#5c9de6; --archi:#6f7d78; --accent:#e8913a;
     --ok:#5cb87d; --warn:#e0a84a; --crit:#ec6a52; --sel:#ffd060; --scene:#131a18; color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
   --bg:#101614; --panel:#171f1c; --panel-2:#1d2622; --line:#2b3632; --fg:#e4ebe7; --muted:#93a39c;
-  --elec:#e8913a; --cvc:#35a9c4; --archi:#6f7d78; --accent:#e8913a;
+  --elec:#e8913a; --cvc:#35a9c4; --cfa:#a98be0; --ssi:#ef6b5b; --plb:#5c9de6; --archi:#6f7d78; --accent:#e8913a;
   --ok:#5cb87d; --warn:#e0a84a; --crit:#ec6a52; --sel:#ffd060; --scene:#131a18; color-scheme:dark;
 }
 html,body{height:100%}
@@ -79,8 +79,8 @@ main.grid{flex:1;min-height:0;display:grid;grid-template-columns:260px minmax(0,
 @media (max-width:560px){.hint{display:none}}
 .tools button{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer}
 .tools button:focus-visible,.chip:focus-visible,.tabs button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
-.tabs{display:flex;border-bottom:1px solid var(--line);overflow-x:auto}
-.tabs button{all:unset;cursor:pointer;padding:10px 8px;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap}
+.tabs{display:flex;flex-wrap:wrap;column-gap:4px;border-bottom:1px solid var(--line)}
+.tabs button{all:unset;cursor:pointer;padding:10px 6px;font-size:12.5px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap}
 .tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
 .pane{overflow:auto;padding:14px;flex:1;min-height:0;display:flex;flex-direction:column;gap:14px}
 .empty{color:var(--muted);font-size:13px;display:flex;flex-direction:column;gap:8px}
@@ -137,6 +137,45 @@ figure.photo figcaption{font-size:12px;color:var(--muted);padding:8px 10px;borde
 h2.sub{font-family:var(--f-display);font-size:13px;letter-spacing:.06em;text-transform:uppercase;margin:10px 0 4px;color:var(--muted)}
 h2.sub span{font-family:var(--f-mono);font-weight:400}
 .foot{font-size:11px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap}
+.sel{font:inherit;color:var(--fg);background:var(--panel-2);border:1px solid var(--line);border-radius:4px;padding:4px;max-width:100%}
+.ctl{border:1px solid var(--line);border-left:4px solid var(--ok);border-radius:6px;padding:10px 12px;display:flex;flex-direction:column;gap:5px;background:var(--panel-2)}
+.ctl.warn{border-left-color:var(--warn)} .ctl.crit{border-left-color:var(--crit)}
+.ctl .top{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px} .ctl p{margin:0;font-size:13px} .ctl .act{font-size:12px;color:var(--muted)}
+.ctl .row{display:flex;gap:8px;flex-wrap:wrap} .ctl button{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:3px 9px;font-size:12px;cursor:pointer}
+.mrow{display:grid;grid-template-columns:auto auto 1fr;gap:4px 10px;align-items:start;border-bottom:1px solid var(--line);padding:6px 0;font-size:13px}
+.mrow p{grid-column:1/-1;margin:0}
+.madd summary{cursor:pointer;font-weight:600;font-size:13px}
+.madd form{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.madd label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--muted)}
+.madd input,.madd select,.madd textarea{font:inherit;color:var(--fg);background:var(--panel-2);border:1px solid var(--line);border-radius:4px;padding:5px}
+.madd button{align-self:flex-start;background:var(--fg);color:var(--panel);border:0;border-radius:4px;padding:6px 14px;cursor:pointer}
+figure.photo figcaption a{color:inherit}
+#docview{position:fixed;inset:0;z-index:50;background:rgba(10,14,13,.55);display:flex;justify-content:center;align-items:flex-start;padding:24px 12px;overflow:auto}
+#docview[hidden]{display:none}
+.dv-box{background:#fff;color:#18211e;width:100%;max-width:860px;border-radius:8px;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+.dv-bar{position:sticky;top:0;display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid #d6ddd9;background:#f6f8f7;border-radius:8px 8px 0 0}
+.dv-bar b{font-family:var(--f-display);font-size:14px} .dv-act{margin-left:auto;display:flex;gap:6px}
+.dv-act button{font:inherit;font-size:13px;border:1px solid #c9d1cd;background:#fff;color:#18211e;border-radius:4px;padding:4px 10px;cursor:pointer}
+.dv-doc{padding:22px 28px 28px;font-family:var(--f-body);font-size:12.5px;line-height:1.45}
+.dv-h{display:flex;justify-content:space-between;gap:16px;border-bottom:3px solid #18211e;padding-bottom:10px;margin-bottom:8px;flex-wrap:wrap}
+.dv-h h1{font-family:var(--f-display);font-size:20px;margin:2px 0 0;line-height:1.2}
+.dv-k{font-family:var(--f-mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#5d6b66}
+.dv-ref{font-family:var(--f-mono);font-size:11px;text-align:right;color:#5d6b66}
+.dv-site{font-size:12px;color:#3c4945;margin-bottom:10px}
+.dv-doc h2{font-family:var(--f-display);font-size:13px;text-transform:uppercase;letter-spacing:.05em;margin:16px 0 6px;border-left:4px solid #c9711c;padding-left:8px}
+.dv-t{width:100%;border-collapse:collapse;font-size:12px}
+.dv-t th{text-align:left;background:#eef1ef;border:1px solid #d6ddd9;padding:4px 6px;font-weight:600}
+.dv-t td{border:1px solid #d6ddd9;padding:4px 6px;vertical-align:top;overflow-wrap:anywhere}
+.dv-cols{display:grid;grid-template-columns:minmax(0,1fr) 240px;gap:14px;align-items:start}
+.dv-fig{margin:30px 0 0} .dv-fig img{width:100%;border:1px solid #d6ddd9;border-radius:4px;display:block}
+.dv-cap{display:block;font-size:10px;color:#5d6b66;margin-top:3px}
+.dv-s{font-size:11px;font-weight:600;padding:1px 7px;border-radius:999px;border:1px solid currentColor;white-space:nowrap}
+.dv-s.ok{color:#2c7d4a}.dv-s.warn{color:#b7791f}.dv-s.crit{color:#bf3b28}
+.dv-sig{margin-top:18px;font-style:italic;color:#5d6b66}
+.dv-demo{margin-top:22px;border-top:1px dashed #c9d1cd;padding-top:8px;font-size:10.5px;color:#5d6b66}
+.dv-tw{overflow-x:auto}
+@media (max-width:640px){.dv-cols{grid-template-columns:1fr}.dv-fig{margin:0}.dv-doc{padding:16px}#docview{padding:8px 4px}.dv-t{min-width:560px}.dv-cols .dv-t{min-width:0}}
+@media print{body.dv-open .app{display:none} #docview{position:static;background:none;padding:0;overflow:visible} .dv-box{box-shadow:none;max-width:none} .dv-bar{display:none} .dv-doc{padding:0} .dv-t tr{break-inside:avoid}}
 @media (max-width:1100px){ main.grid{grid-template-columns:220px minmax(0,1fr) 330px} }
 @media (max-width:860px){
   html,body{height:auto}
@@ -155,7 +194,7 @@ h2.sub span{font-family:var(--f-mono);font-weight:400}
     <div class="brand">
       <span class="eyebrow">ERP type R · 3e catégorie · 2 niveaux + toiture</span>
       <h1>Groupe scolaire Les Tilleuls</h1>
-      <span class="sub">Maquette d'exploitation électricité et CVC <span class="demo-tag">démonstration · données fictives</span></span>
+      <span class="sub">Maquette d'exploitation tous lots : CFO, CFA, SSI, plomberie, CVC <span class="demo-tag">démonstration · données fictives</span></span>
     </div>
     <div class="kpis" id="kpis"></div>
   </header>
@@ -199,7 +238,9 @@ h2.sub span{font-family:var(--f-mono);font-weight:400}
         <button role="tab" id="t-sld" aria-selected="false" data-tab="sld" type="button">Unifilaire</button>
         <button role="tab" id="t-verif" aria-selected="false" data-tab="verif" type="button">Vérifications</button>
         <button role="tab" id="t-qr" aria-selected="false" data-tab="qr" type="button">QR code</button>
+        <button role="tab" id="t-maint" aria-selected="false" data-tab="maint" type="button">Maintenance</button>
         <button role="tab" id="t-reg" aria-selected="false" data-tab="reg" type="button">Registre</button>
+        <button role="tab" id="t-ctrl" aria-selected="false" data-tab="ctrl" type="button">Contrôles</button>
       </div>
       <div class="pane" id="pane"></div>
     </section>
@@ -207,6 +248,7 @@ h2.sub span{font-family:var(--f-mono);font-weight:400}
   <div class="foot">
     <span>Maquette IFC 4 · classes et identifiants IFC sur chaque objet</span>
     <span>Statuts des observations enregistrés dans ce navigateur uniquement (démo)</span>
+    <button type="button" class="linkbtn" data-credits="1">Crédits photos</button>
     <span>Registre Vivant · NT Ingénierie · <a href="mailto:be-tce@nt-ing.fr?subject=Registre%20Vivant%20-%20d%C3%A9monstration" style="color:inherit">be-tce@nt-ing.fr</a> · 01 89 16 87 90</span>
   </div>
 </div>
@@ -225,7 +267,10 @@ const LEVELS = [
   {id:"TT", name:"Toiture-terrasse", z:2*H}
 ];
 const LOTS = {
-  ELEC:{name:"Électricité", color:"--elec"},
+  ELEC:{name:"Courants forts", color:"--elec"},
+  CFA:{name:"Courants faibles", color:"--cfa"},
+  SSI:{name:"Sécurité incendie", color:"--ssi"},
+  PLB:{name:"Plomberie", color:"--plb"},
   CVC:{name:"CVC", color:"--cvc"},
   ARCHI:{name:"Architecture", color:"--archi"}
 };
@@ -327,6 +372,83 @@ eq({id:"GAINES",rep:"GA-SOU",name:"Gaines de soufflage",lot:"CVC",ifc:"IfcDuctSe
 eq({id:"EXT-CUIS",rep:"EXT-01",name:"Tourelle d'extraction cuisine",lot:"CVC",ifc:"IfcFan",level:"TT",room:"Toiture-terrasse",
   parts:[{b:[27,12,2*H,28.2,13.2,2*H+1.1]}],
   props:{"Débit":"3 200 m³/h","Type":"Tourelle 400 °C / 2 h","Asservissement":"Hotte cuisine"}, obs:[]});
+// ---------- Courants faibles (CFA) ----------
+eq({id:"BAIE-VDI",rep:"BAIE-01",name:"Baie de brassage VDI",lot:"CFA",ifc:"IfcCommunicationsAppliance",kind:"baie",level:"R1",room:"Salle informatique",
+  parts:[{b:[0.3,14.9,H,1.1,15.7,H+2.05]}],
+  props:{"Type":"Baie 42U 800 × 800 mm, porte vitrée","Équipement actif":"2 commutateurs PoE+ 48 ports, routeur, pare-feu","Câblage":"Cat. 6A U/FTP · 186 prises RJ45","Rocades":"Fibre OM4 12 brins vers sous-répartiteur RDC","Onduleur":"3 kVA · autonomie 15 min","Alimentation":"TD-R1 / D4 (circuit dédié)","Mise en service":"2019"},
+  obs:[]});
+eq({id:"WIFI",rep:"WIFI",name:"Bornes Wi-Fi",lot:"CFA",ifc:"IfcCommunicationsAppliance",level:"R1",room:"Classes et BCD",
+  parts:[[5,3.5,0],[15,3.5,0],[24,3.5,0],[5,3.5,H],[15,3.5,H],[25,3.5,H],[35,3.5,H],[15,12.5,H]].map(([x,y,z])=>({b:[x-.15,y-.15,z+3.18,x+.15,y+.15,z+3.24]})),
+  props:{"Matériel":"Points d'accès Wi-Fi 6 plafonniers, PoE","Alimentation":"Switch PoE de la baie BAIE-01","Couverture":"Classes, BCD, salle informatique"}, obs:[]});
+eq({id:"PORTIER",rep:"INT-01",name:"Portier vidéo de l'entrée",lot:"CFA",ifc:"IfcCommunicationsAppliance",kind:"inter",level:"RDC",room:"Hall / accueil",
+  parts:[{b:[0.02,11.8,1.35,0.12,12.2,1.7]}],
+  props:{"Type":"Platine de rue vidéo 2 fils, 1 bouton","Poste intérieur":"Moniteur à l'accueil + renvoi bureau de direction","Gâche":"Ventouse 300 kg, déverrouillage SSI","Mise en service":"2017"},
+  obs:[]});
+eq({id:"BADGE",rep:"CA-01",name:"Contrôle d'accès porte de service",lot:"CFA",ifc:"IfcSensor",kind:"badge",level:"RDC",room:"Cuisine",
+  parts:[{b:[31.2,15.88,1.15,31.45,15.98,1.4]}],
+  props:{"Type":"Lecteur de badges MIFARE + clavier","Porte":"Porte de livraison de la cuisine","Gestion":"Centrale autonome, 40 badges actifs","Asservissement SSI":"Déverrouillage sur alarme générale"},
+  obs:[]});
+eq({id:"PPMS",rep:"PPMS-01",name:"Alarme PPMS (alerte intrusion et confinement)",lot:"CFA",ifc:"IfcAlarm",kind:"sirene",level:"RDC",room:"Hall / accueil",
+  parts:[{b:[0.02,13.2,1.3,0.14,13.8,1.8]},{b:[19.9,8.95,2.5,20.3,9.0,2.75]},{b:[19.9,8.95,H+2.5,20.3,9.0,H+2.75]}],
+  props:{"Fonction":"Alerte attentat-intrusion et confinement, son distinct de l'alarme incendie","Composition":"Centrale à l'accueil, 2 diffuseurs (RDC et R+1), 3 boutons de déclenchement","Dernier exercice":"2026-10-06","Référence":"Plan particulier de mise en sûreté de l'école"},
+  obs:[]});
+
+// ---------- Sécurité incendie (SSI) ----------
+EQ.find(e=>e.id==="SSI").lot="SSI";
+Object.assign(EQ.find(e=>e.id==="SSI"),{kind:"cmsi",props:{"Catégorie SSI":"A","ECS":"Centrale adressable · 8 zones de détection","CMSI":"2 zones de mise en sécurité (ZS), 2 zones d'alarme (ZA)","Alarme":"Type 1","Asservissements":"Portes coupe-feu, clapets CF-01 à CF-04, arrêt CTA, déverrouillage accès","Alimentation":"AES 24 V · batteries 2 × 12 V 17 Ah (remplacées 2024-09)","Dernier essai":"2026-09-15 · conforme","Mise en service":"2009"}});
+eq({id:"DET",rep:"DET",name:"Détecteurs automatiques d'incendie",lot:"SSI",ifc:"IfcSensor",level:"RDC",room:"Circulations et locaux à risques",
+  parts:[[6,8,0],[16,8,0],[26,8,0],[36,8,0],[37,3.5,0],[31,3.5,0],[28.5,12.5,0],[5,12.5,0],[6,8,H],[16,8,H],[26,8,H],[36,8,H],[5,12.5,H],[15,12.5,H]].map(([x,y,z])=>({b:[x-.1,y-.1,z+3.2,x+.1,y+.1,z+3.3]})),
+  props:{"Technologie":"Détecteurs ponctuels adressables","Zones":"ZD1 à ZD8"}, obs:[]});
+eq({id:"DM",rep:"DM",name:"Déclencheurs manuels",lot:"SSI",ifc:"IfcAlarm",level:"RDC",room:"Issues et circulations",
+  parts:[[1.2,9.02,0],[39.5,8.98,0],[20.6,8.98,0],[1.2,9.02,H],[39.5,8.98,H]].map(([x,y,z])=>({b:[x-.06,y-.04,z+1.25,x+.06,y+.04,z+1.37]})),
+  props:{"Type":"Déclencheurs manuels réarmables, rouges","Hauteur":"1,30 m","Implantation":"À chaque issue et dans les circulations"}, obs:[]});
+eq({id:"DS",rep:"DS",name:"Diffuseurs sonores d'alarme",lot:"SSI",ifc:"IfcAlarm",kind:"diffuseur",level:"RDC",room:"Circulations",
+  parts:[[10,8.98,0],[30,8.98,0],[10,8.98,H],[30,8.98,H],[17,15.95,0]].map(([x,y,z])=>({b:[x-.1,y-.05,z+2.6,x+.1,y+.05,z+2.8]})),
+  props:{"Type":"Diffuseurs sonores non autonomes (DSNA) + flash","Signal":"Son normalisé d'évacuation NF S 32-001","Alimentation":"CMSI · ligne de diffusion surveillée"}, obs:[]});
+eq({id:"PCF",rep:"PCF-R1",name:"Porte coupe-feu de recoupement R+1",lot:"SSI",ifc:"IfcDoor",kind:"porte",level:"R1",room:"Circulation R+1",
+  parts:[{b:[19.95,7.05,H,20.05,8.95,H+2.1]},{b:[19.85,8.85,H+2.0,20.15,8.95,H+2.1]}],
+  props:{"Type":"Bloc-porte va-et-vient 2 vantaux EI 30 (CF ½ h)","Maintien":"Ventouses 24 V sur DAS, fermeture sur alarme","Ferme-porte":"Ferme-portes hydrauliques à sélecteur","Dernier essai":"2026-09-15"},
+  obs:[]});
+eq({id:"EXT",rep:"EXT",name:"Extincteurs",lot:"SSI",ifc:"IfcFireSuppressionTerminal",level:"RDC",room:"Tout le bâtiment",
+  parts:[[2.5,8.97,0,"e"],[22,8.97,0,"e"],[38,8.97,0,"e"],[36.5,6.9,0,"c"],[29.5,6.9,0,"p"],[26.5,15.9,0,"c"],[2.5,8.97,H,"e"],[22,8.97,H,"e"],[38,8.97,H,"e"],[1.5,15.9,H,"c"]].map(([x,y,z,t])=>({t,b:[x-.1,y-.1,z+0.15,x+.1,y+.1,z+0.75]})),
+  props:{"Parc":"10 appareils","Vérification annuelle":"2026-01-20 · conforme NF S 61-919"}, obs:[]});
+
+// ---------- Plomberie (PLB) ----------
+eq({id:"CPT-EAU",rep:"CPT-EAU",name:"Compteur général d'eau",lot:"PLB",ifc:"IfcFlowMeter",kind:"compteur",level:"RDC",room:"Chaufferie",
+  parts:[{b:[28.2,6.2,0.4,28.6,6.7,0.7]}],
+  props:{"Calibre":"DN 40 · compteur à télérelève","Pression réseau":"4,2 bar (après réducteur)","Réducteur de pression":"DN 40, réglé à 3,5 bar","Index au 2026-10-01":"14 382 m³","Consommation 2025":"1 260 m³"},
+  obs:[]});
+eq({id:"DISC",rep:"BA-01",name:"Disconnecteur à zone de pression réduite (BA)",lot:"PLB",ifc:"IfcValve",kind:"discon",level:"RDC",room:"Chaufferie",
+  parts:[{b:[28.7,6.2,0.4,29.4,6.6,0.75]}],
+  props:{"Type":"Disconnecteur contrôlable BA DN 25","Protection":"Remplissage du réseau de chauffage","Norme":"NF EN 12729","Dernier contrôle":"2026-04-14 · conforme","Périodicité":"Annuelle, par un vérificateur agréé"},
+  obs:[]});
+eq({id:"ECS",rep:"ECS-01",name:"Ballon d'eau chaude sanitaire de la cuisine",lot:"PLB",ifc:"IfcTank",kind:"ballon",level:"RDC",room:"Cuisine",
+  parts:[{b:[25.3,15.1,0,26.0,15.8,1.9]}],
+  props:{"Type":"Ballon électrique vertical 300 L, résistance stéatite 3 kW","Consigne":"60 °C","Température au départ":"61 °C (relevé 2026-10-01)","Température au retour de boucle":"53 °C (relevé 2026-10-01)","Groupe de sécurité":"Remplacé 2025-08","Alimentation":"TD-CUIS / C2","Mise en service":"2015"},
+  obs:[{ref:"OBS-2026-21",g:"warn",rap:"ECS-2026",t:"Température au retour de boucle d'ECS inférieure à 50 °C (relevé 48 °C).",a:"Équilibrer la boucle et vérifier le circulateur de bouclage.",s:"done"}]});
+eq({id:"RES-EAU",rep:"RES-EAU",name:"Réseaux eau froide et eau chaude",lot:"PLB",ifc:"IfcPipeSegment",level:"RDC",room:"Circulations et sanitaires",
+  parts:[{b:[25,7.08,2.45,39.6,7.18,2.55]},{b:[25,7.22,2.45,39.6,7.32,2.55]},{b:[39.45,7.08,2.45,39.6,7.32,H+2.55]},{b:[30,7.08,H+2.45,39.6,7.18,H+2.55]},{b:[30,7.22,H+2.45,39.6,7.32,H+2.55]},{b:[28.6,6.4,0.5,28.7,7.18,2.55]}],
+  props:{"Matériau":"Cuivre écroui, PER sur les antennes","Diamètre principal":"DN 32 eau froide · DN 25 eau chaude bouclée","Calorifuge":"Mousse élastomère 13 mm sur l'ECS","Vannes de sectionnement":"Une par niveau et par bloc sanitaire"},
+  obs:[]});
+eq({id:"SAN-RDC",rep:"SAN-RDC",name:"Bloc sanitaire RDC",lot:"PLB",ifc:"IfcSanitaryTerminal",kind:"san",level:"RDC",room:"Sanitaires RDC",
+  parts:[...[33.2,34.6,36,37.4].map(x=>({b:[x,15.2,0,x+.5,15.9,0.45]})),{b:[33,9.2,0.75,38,9.7,0.9]}],
+  props:{"Équipements":"4 WC enfants, 1 WC PMR, 1 rangée de 6 lavabos","Robinetterie":"Temporisée, mitigeurs thermostatiques en tête","Eau chaude":"Lavabos uniquement, 38 °C maximum au point de puisage"},
+  obs:[{ref:"OBS-2026-22",g:"warn",rap:"",t:"Chasse d'eau du WC n° 3 en fuite permanente.",a:"Remplacer le mécanisme de chasse.",s:"open"}]});
+eq({id:"SAN-R1",rep:"SAN-R1",name:"Bloc sanitaire R+1",lot:"PLB",ifc:"IfcSanitaryTerminal",kind:"san",level:"R1",room:"Sanitaires R+1",
+  parts:[...[31.2,32.6,34,35.4].map(x=>({b:[x,15.2,H,x+.5,15.9,H+0.45]})),{b:[31,9.2,H+0.75,36,9.7,H+0.9]}],
+  props:{"Équipements":"4 WC enfants, 1 rangée de 6 lavabos","Robinetterie":"Temporisée"},
+  obs:[]});
+eq({id:"BAG",rep:"BAG-01",name:"Séparateur à graisses de la cuisine",lot:"PLB",ifc:"IfcInterceptor",kind:"bag",level:"RDC",room:"Cuisine",
+  parts:[{b:[30.2,9.4,0,31.6,10.4,0.35]}],
+  props:{"Type":"Séparateur à graisses enterré avec débourbeur, NG 4","Matériau":"Polyéthylène","Accès":"Tampon dans la cuisine","Dernière vidange":"2026-06-30 (bordereau de suivi des déchets conservé)","Périodicité":"Semestrielle"},
+  obs:[]});
+
+// ---------- CVC : compléments ----------
+eq({id:"DET-GAZ",rep:"DG-01",name:"Détection gaz de la chaufferie",lot:"CVC",ifc:"IfcSensor",kind:"det",level:"RDC",room:"Chaufferie",
+  parts:[{b:[33.6,3.5,3.0,33.9,3.8,3.2]}],
+  props:{"Type":"Centrale de détection méthane, 1 tête catalytique","Seuils":"10 % LIE pré-alarme · 20 % LIE coupure","Action":"Coupure de l'électrovanne gaz à l'extérieur du local","Dernier étalonnage":"2025-10-08","Norme":"NF EN 60079-29-1"},
+  obs:[{ref:"OBS-2026-23",g:"warn",rap:"GAZ-2026",t:"Étalonnage annuel de la tête de détection gaz dépassé.",a:"Faire étalonner la tête par le mainteneur.",s:"open"}]});
+
 // Objets unitaires : chaque luminaire, bloc BAES et radiateur a sa propre fiche
 const pad=n=>String(n).padStart(2,"0");
 function roomAt(lv,x,y){const r=ROOMS.find(([l,n,x0,y0,x1,y1])=>l===lv&&x>=x0&&x<=x1&&y>=y0&&y<=y1);return r?r[1]:"—"}
@@ -350,6 +472,98 @@ explode("BAES","BAES",(p,i,room,lv)=>{const o=[];
   props:{"Type":"BAES évacuation 45 lm, SATI","Autonomie":"1 h","Circuit":lv==="RDC"?"TD-RDC / D6":"TD-R1 / D6","Hauteur de pose":"2,30 m","Dernier test":"2026-09-15","État":o.length?"Remplacé le 2026-03-20":"Bon"}}});
 explode("RAD","RAD",(p,i,room)=>({kind:"rad",name:"Radiateur · "+room,
   props:{"Type":"Radiateur acier à panneaux","Puissance":"1 500 W (estimée, régime 70/50 °C)","Robinet":"Thermostatique","Réseau":"RES-CH","Équilibrage":"Non documenté"}}));
+explode("WIFI","AP",(p,i,room)=>({kind:"wifi",name:"Borne Wi-Fi · "+room,
+  props:{"Type":"Point d'accès Wi-Fi 6 plafonnier, 2 × 2 MIMO","Alimentation":"PoE+ depuis BAIE-01","Prise":"RJ45 cat. 6A repérée "+("P-"+pad(40+i)),"Hauteur de pose":"3,20 m (faux plafond)","Mise en service":"2023"}}));
+let detBcd=0;
+explode("DET","DET",(p,i,room,lv)=>{const o=[];
+  const typ=room==="Cuisine"?"Thermovélocimétrique adressable":room==="Chaufferie"?"Thermostatique 78 °C adressable":"Optique de fumée adressable";
+  if(room==="BCD"&&!detBcd++)o.push({ref:"OBS-2025-32",g:"warn",rap:"SSI-2025",t:"Détecteur encrassé : signal de maintenance remonté par l'ECS.",a:"Nettoyer ou remplacer la tête de détection.",s:"done"});
+  return {kind:"det",name:"Détecteur "+(typ.split(" ")[0].toLowerCase())+" · "+room,obs:o,
+  props:{"Type":typ,"Zone":"ZD"+(lv==="R1"?(room==="BCD"||room==="Salle informatique"?"6":"5"):(["Cuisine","Chaufferie","Local TGBT"].includes(room)?"2":room==="Hall / accueil"?"1":"3")),"Adresse":"Boucle 1 · "+pad(i+1),"Hauteur de pose":"3,30 m","Dernier essai":"2026-09-15 · conforme"}}});
+explode("DM","DM",(p,i,room,lv)=>{const o=[];
+  if(i===0)o.push({ref:"OBS-2025-31",g:"crit",rap:"SSI-2025",t:"Déclencheur manuel du hall : membrane cassée et capot de protection absent.",a:"Remplacer la membrane, poser un capot de protection (local accessible aux élèves).",s:"done"});
+  return {kind:"dm",name:"Déclencheur manuel · "+room,obs:o,
+  props:{"Type":"Déclencheur manuel à membrane réarmable","Zone":"ZD"+(lv==="R1"?"5":"3"),"Adresse":"Boucle 1 · "+pad(30+i),"Hauteur de pose":"1,30 m","Dernier essai":"2026-09-15 · conforme"}}});
+explode("DS","DS",(p,i,room)=>({kind:"diffuseur",name:"Diffuseur sonore · "+room,
+  props:{"Type":"Diffuseur sonore non autonome avec flash","Zone d'alarme":"ZA"+(i<2||i===4?"1":"2"),"Niveau sonore":"92 dB(A) à 1 m","Dernier essai":"2026-09-15 · audible dans tous les locaux"}}));
+explode("EXT","EXT",(p,i,room)=>{const T={e:["Eau pulvérisée + additif 6 L","21A-144B"],c:["CO₂ 2 kg","34B"],p:["Poudre ABC 9 kg","43A-233B-C"]}[p.t];
+  return {kind:"ext",name:"Extincteur "+T[0].split(" ")[0].toLowerCase()+" · "+room,
+  props:{"Type":T[0],"Efficacité":T[1],"N° de série":"EX-"+(2190+i*7),"Date de fabrication":p.t==="c"?"2018":"2021","Dernière vérification":"2026-01-20 · conforme","Prochaine révision (10 ans)":p.t==="c"?"2028":"2031","Hauteur de la poignée":"≤ 1,20 m"}}});
+
+// ---------- Rapports de contrôle réglementaire ----------
+const TODAY=new Date("2026-10-29");
+const REPORTS=[
+ {id:"ELEC-2026",lots:["ELEC"],t:"Vérification périodique des installations électriques",ref:"Arrêté du 10 octobre 2000 · ERP art. EL 19 et EC 15 · Code du travail art. R. 4226-16",per:"Annuelle",date:"2026-03-12",next:"2027-03-12",org:"Organisme de contrôle agréé (fictif)",num:"VP-EL-2026-0412",
+  mes:[["Schéma de liaison à la terre","TT"],["Résistance de la prise de terre","18 Ω"],["Isolement des circuits (500 V CC)","> 2 MΩ sur tous les départs"],["Essais des dispositifs différentiels","1 défaut (TD-RDC, rangée 2)"],["Éclairage de sécurité","Autonomie 1 h vérifiée, 2 blocs défaillants"],["Thermographie infrarouge","1 point chaud (TD-R1 / D4)"]]},
+ {id:"SSI-2025",lots:["SSI"],t:"Vérification triennale du système de sécurité incendie (catégorie A)",ref:"ERP art. MS 73",per:"Tous les 3 ans",date:"2025-09-23",next:"2028-09-23",org:"Organisme de contrôle agréé (fictif)",num:"VP-SSI-2025-0187",
+  mes:[["Essais de détection","14 détecteurs essayés sur 14"],["Déclencheurs manuels","5 essayés, 1 défectueux"],["Asservissements (DAS)","Portes CF, clapets CF-01 à CF-04, arrêt CTA : fonctionnement contrôlé, CF-03 non réarmé"],["Audibilité de l'alarme","Satisfaisante dans tous les locaux"],["Alimentation de sécurité","Autonomie batteries conforme"]]},
+ {id:"SSI-MAINT",lots:["SSI"],t:"Entretien annuel du système de sécurité incendie",ref:"ERP art. MS 58 (contrat d'entretien)",per:"Annuelle",date:"2026-09-15",next:"2027-09-15",org:"Mainteneur SSI (fictif)",num:"ENT-SSI-2026-09",
+  mes:[["Essais fonctionnels","ECS, CMSI, DAS, diffuseurs : conformes"],["Batteries","Tension de floating et autonomie conformes"]]},
+ {id:"GAZ-2026",lots:["CVC"],t:"Vérification des installations de chauffage et de gaz",ref:"ERP art. CH 58 et GZ 30",per:"Annuelle",date:"2025-11-05",next:"2026-11-05",org:"Organisme de contrôle agréé (fictif)",num:"VP-CH-2025-0933",
+  mes:[["Étanchéité de l'alimentation gaz","Conforme"],["Coupure extérieure gaz","Manœuvrée, signalée"],["Ventilation de la chaufferie","Amenée d'air et évacuation conformes"],["Analyse de combustion CH-1 / CH-2","CO 18 ppm / 22 ppm"]]},
+ {id:"EXT-2026",lots:["SSI"],ids:["EXT"],t:"Vérification annuelle des extincteurs",ref:"ERP art. MS 38 · règle APSAD R4 · NF S 61-919",per:"Annuelle",date:"2026-01-20",next:"2027-01-20",org:"Société de vérification des extincteurs (fictive)",num:"EXT-2026-0058",
+  mes:[["Appareils vérifiés","10 sur 10"],["Appareils remplacés","0"],["Signalisation et accessibilité","Conformes"]]},
+ {id:"BA-2026",lots:["PLB"],ids:["DISC"],t:"Contrôle annuel du disconnecteur",ref:"Code de la santé publique art. R. 1321-57 · NF EN 12729",per:"Annuelle",date:"2026-04-14",next:"2027-04-14",org:"Vérificateur agréé de disconnecteurs (fictif)",num:"BA-2026-112",
+  mes:[["Clapet amont","Étanche · ΔP 0,21 bar"],["Clapet aval","Étanche"],["Ouverture de la décharge","0,16 bar (≥ 0,14 bar)"]]},
+ {id:"ECS-2026",lots:["PLB"],ids:["ECS"],t:"Surveillance de l'eau chaude sanitaire",ref:"Arrêté du 30 novembre 2005 (température de l'ECS)",per:"Relevé mensuel",date:"2026-10-01",next:"2026-11-01",org:"Exploitant (relevé interne)",num:"RL-ECS-2026-10",
+  mes:[["Départ de production","61 °C"],["Retour de boucle","53 °C"],["Point de puisage le plus éloigné","51 °C"]]}
+];
+const repById=Object.fromEntries(REPORTS.map(r=>[r.id,r]));
+const days=d=>Math.round((new Date(d)-TODAY)/864e5);
+const repStatus=r=>{const n=days(r.next);return n<0?["crit","En retard"]:n<=30?["warn","À planifier"]:["ok","À jour"]};
+const fdate=d=>d?d.split("-").reverse().join("/"):"—";
+
+// ---------- Registres de maintenance (intervenants fictifs) ----------
+const MAINT={
+ "TGBT":{per:"Annuelle",by:"Électricien titulaire (fictif)",next:"2027-03-01",log:[["2026-03-20","Correctif","Repérage gravé des départs Q1 à Q6 en cours (OBS-2026-02)."],["2026-03-02","Préventif","Resserrage des connexions, nettoyage, essai de l'interrupteur général."],["2025-03-04","Préventif","Resserrage, thermographie : RAS."]]},
+ "TD-RDC":{per:"Annuelle",by:"Électricien titulaire (fictif)",next:"2027-03-01",log:[["2026-03-20","Correctif","Pose de deux obturateurs (OBS-2026-04)."],["2026-03-02","Préventif","Essai des différentiels : rangée 2 sans déclenchement, remplacement commandé."]]},
+ "TD-R1":{per:"Annuelle",by:"Électricien titulaire (fictif)",next:"2027-03-01",log:[["2026-05-12","Correctif","Unifilaire reconstitué, QR code posé en porte (OBS-2026-05)."],["2026-03-02","Préventif","Thermographie : point chaud au départ D4, intervention à planifier."]]},
+ "TD-CUISINE":{per:"Annuelle",by:"Électricien titulaire (fictif)",next:"2027-03-01",log:[["2026-03-02","Préventif","Resserrage, contrôle IP55 des presse-étoupes."]]},
+ "TD-CHAUFF":{per:"Annuelle",by:"Électricien titulaire (fictif)",next:"2027-03-01",log:[["2026-03-02","Préventif","Essai de l'arrêt d'urgence extérieur : fonctionne."]]},
+ "TD-CTA":{per:"Annuelle",by:"Électricien titulaire (fictif)",next:"2027-03-01",log:[["2026-03-02","Préventif","Contrôle de l'étanchéité du coffret extérieur."]]},
+ "ECL-RDC":{per:"Annuelle",by:"Électricien titulaire (fictif)",next:"2027-03-01",log:[["2026-03-02","Préventif","Contrôle des détecteurs de présence et de la gradation."]]},
+ "ECL-R1":{per:"Annuelle",by:"Électricien titulaire (fictif)",next:"2027-03-01",log:[["2026-03-02","Préventif","Remplacement de 6 tubes T8. Passage LED à chiffrer."]]},
+ "BAES":{per:"Test d'autonomie annuel · test fonctionnel mensuel (SATI)",by:"Électricien titulaire (fictif)",next:"2026-11-15",log:[["2026-10-15","Préventif","Test fonctionnel SATI : RAS."],["2026-03-20","Correctif","Remplacement de 2 blocs défaillants (OBS-2026-10 et 15)."]]},
+ "CDC-RDC":{per:"Visuelle annuelle",by:"Électricien titulaire (fictif)",next:"2027-03-01",log:[["2026-03-02","Préventif","Contrôle visuel, réserve suffisante."]]},
+ "CDC-R1":{per:"Visuelle annuelle",by:"Électricien titulaire (fictif)",next:"2027-03-01",log:[["2026-03-02","Préventif","Câble neuf tiré pour la salle informatique."]]},
+ "SSI":{per:"Annuelle (MS 58)",by:"Mainteneur SSI (fictif)",next:"2027-09-15",log:[["2026-09-15","Préventif","Entretien annuel : essais ECS, CMSI, DAS et diffuseurs conformes."],["2025-09-23","Contrôle","Vérification triennale par l'organisme agréé (VP-SSI-2025-0187)."],["2024-09-12","Correctif","Remplacement des batteries 2 × 12 V 17 Ah."]]},
+ "DET":{per:"Annuelle (MS 58)",by:"Mainteneur SSI (fictif)",next:"2027-09-15",log:[["2026-09-15","Préventif","Essai de tous les détecteurs : conformes."],["2025-10-02","Correctif","Nettoyage du détecteur de la BCD (OBS-2025-32)."]]},
+ "DM":{per:"Annuelle (MS 58)",by:"Mainteneur SSI (fictif)",next:"2027-09-15",log:[["2026-09-15","Préventif","Essai des 5 déclencheurs : conformes."],["2025-10-02","Correctif","Membrane du DM du hall remplacée, capot posé (OBS-2025-31)."]]},
+ "DS":{per:"Annuelle (MS 58)",by:"Mainteneur SSI (fictif)",next:"2027-09-15",log:[["2026-09-15","Préventif","Essai d'audibilité dans tous les locaux."]]},
+ "PCF":{per:"Annuelle (MS 58) · contrôle visuel mensuel",by:"Mainteneur SSI (fictif)",next:"2026-11-05",log:[["2026-10-05","Préventif","Contrôle visuel : fermeture complète, ferme-portes réglés."],["2026-09-15","Préventif","Essai de fermeture sur alarme : conforme."]]},
+ "EXT":{per:"Annuelle (MS 38)",by:"Société de vérification des extincteurs (fictive)",next:"2027-01-20",log:[["2026-01-20","Contrôle","Vérification des 10 appareils : conformes, étiquettes à jour."]]},
+ "BAIE-VDI":{per:"Annuelle",by:"Intégrateur réseau (fictif)",next:"2027-02-10",log:[["2026-02-10","Préventif","Mises à jour des commutateurs, test de l'onduleur (autonomie 17 min)."]]},
+ "WIFI":{per:"Annuelle",by:"Intégrateur réseau (fictif)",next:"2027-02-10",log:[["2026-02-10","Préventif","Mise à jour des bornes, relevé de couverture."]]},
+ "PORTIER":{per:"Annuelle",by:"Électricien titulaire (fictif)",next:"2027-03-01",log:[["2026-03-02","Préventif","Essai platine, moniteur et ventouse : RAS."]]},
+ "BADGE":{per:"Annuelle",by:"Électricien titulaire (fictif)",next:"2027-03-01",log:[["2026-09-01","Exploitation","Mise à jour des badges de rentrée (12 badges désactivés)."]]},
+ "PPMS":{per:"Essai trimestriel · exercice annuel",by:"Direction de l'école",next:"2027-01-06",log:[["2026-10-06","Exercice","Exercice PPMS attentat-intrusion : alarme audible partout."]]},
+ "CH-1":{per:"Annuelle (décret n° 2009-649)",by:"Mainteneur CVC (fictif)",next:"2027-09-02",log:[["2026-09-02","Préventif","Entretien annuel, analyse de combustion, attestation remise."],["2026-03-15","Correctif","Stockage déplacé devant la trappe du conduit (OBS-2026-11)."]]},
+ "CH-2":{per:"Annuelle (décret n° 2009-649)",by:"Mainteneur CVC (fictif)",next:"2027-09-02",log:[["2026-09-02","Préventif","Entretien annuel, analyse de combustion, attestation remise."]]},
+ "RES-CH":{per:"Annuelle",by:"Mainteneur CVC (fictif)",next:"2027-09-02",log:[["2026-09-02","Préventif","Pression réseau 1,6 bar, purge, contrôle des circulateurs."]]},
+ "RAD":{per:"Annuelle",by:"Mainteneur CVC (fictif)",next:"2027-09-02",log:[["2026-09-02","Préventif","Purge des radiateurs, contrôle des robinets thermostatiques."]]},
+ "CTA":{per:"Filtres semestriels · entretien annuel",by:"Mainteneur CVC (fictif)",next:"2026-11-10",log:[["2026-10-20","Correctif","Filtres de soufflage commandés (OBS-2026-12)."],["2026-03-10","Préventif","Changement des filtres, contrôle de la courroie et du rotor."]]},
+ "GAINES":{per:"Annuelle",by:"Mainteneur CVC (fictif)",next:"2027-03-10",log:[["2026-03-10","Préventif","Contrôle visuel des clapets coupe-feu."]]},
+ "EXT-CUIS":{per:"Nettoyage annuel du conduit et de la hotte",by:"Mainteneur CVC (fictif)",next:"2027-07-15",log:[["2026-07-15","Préventif","Dégraissage de la hotte et du conduit, certificat de ramonage remis."]]},
+ "DET-GAZ":{per:"Étalonnage annuel",by:"Mainteneur CVC (fictif)",next:"2026-10-08",log:[["2025-10-08","Préventif","Étalonnage de la tête, essai de coupure de l'électrovanne."]]},
+ "CPT-EAU":{per:"Relevé mensuel",by:"Exploitant",next:"2026-11-01",log:[["2026-10-01","Relevé","Index 14 382 m³ · pas de dérive de consommation."]]},
+ "DISC":{per:"Annuelle",by:"Vérificateur agréé de disconnecteurs (fictif)",next:"2027-04-14",log:[["2026-04-14","Contrôle","Contrôle annuel conforme, rapport transmis au distributeur d'eau."]]},
+ "ECS":{per:"Relevé mensuel des températures",by:"Exploitant",next:"2026-11-01",log:[["2026-10-01","Relevé","Départ 61 °C, retour 53 °C."],["2026-06-12","Correctif","Équilibrage de la boucle (OBS-2026-21)."],["2025-08-20","Correctif","Remplacement du groupe de sécurité."]]},
+ "RES-EAU":{per:"Annuelle",by:"Plombier (fictif)",next:"2027-06-30",log:[["2026-06-30","Préventif","Manœuvre des vannes de sectionnement."]]},
+ "SAN-RDC":{per:"À la demande",by:"Plombier (fictif)",next:"",log:[["2026-10-21","Signalement","Fuite de la chasse d'eau du WC n° 3 signalée par l'agent d'entretien."]]},
+ "SAN-R1":{per:"À la demande",by:"Plombier (fictif)",next:"",log:[]},
+ "BAG":{per:"Vidange semestrielle",by:"Entreprise de vidange (fictive)",next:"2026-12-30",log:[["2026-06-30","Préventif","Vidange et curage, bordereau de suivi des déchets conservé."]]}
+};
+const TECH={ // compléments des fiches techniques
+ IfcElectricDistributionBoard:{"Norme de construction":"NF EN 61439-1 et -2","Durée de vie indicative":"25 à 30 ans","Pièces sensibles":"Différentiels, bornes de raccordement"},
+ IfcLightFixture:{"Norme":"NF EN 60598","Durée de vie indicative":"50 000 h (LED) · 15 000 h (T8)"},
+ "SSI:IfcAlarm":{"Norme":"NF EN 54 · NF S 61-936 (CMSI)"},"SSI:IfcSensor":{"Norme":"NF EN 54"},
+ IfcBoiler:{"Durée de vie indicative":"20 ans","Obligation":"Entretien annuel et attestation (décret n° 2009-649)"},
+ IfcUnitaryEquipment:{"Durée de vie indicative":"20 à 25 ans","Consommables":"Filtres ePM1 et ePM10, courroie"},
+ IfcFireSuppressionTerminal:{"Norme":"NF EN 3 · NF S 61-919","Révision":"Tous les 10 ans"},
+ IfcTank:{"Durée de vie indicative":"15 ans","Point de vigilance":"Légionelles : maintenir ≥ 55 °C en sortie"},
+ IfcValve:{"Norme":"NF EN 12729"},IfcDoor:{"Classement":"EI 30 (CF ½ h)"}
+};
+
 const byId = Object.fromEntries(EQ.map(e=>[e.id,e]));
 const members=e=>e.kids?e.kids.map(k=>byId[k]):[e];
 const allParts=e=>members(e).flatMap(m=>m.parts);
@@ -363,9 +577,10 @@ const KEY="jumeau-tilleuls-v1";
 let saved={};
 try{saved=JSON.parse(localStorage.getItem(KEY)||"{}")||{}}catch(e){saved={}}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(saved))}catch(e){}};
-EQ.forEach(e=>e.obs.forEach(o=>{o.eq=e.id;if(saved[o.ref])o.s=saved[o.ref]}));
+EQ.forEach(e=>e.obs.forEach(o=>{o.eq=e.id;if(saved[o.ref])o.s=saved[o.ref];
+  if(o.rap===undefined)o.rap=o.ref==="OBS-2026-11"?"GAZ-2026":o.ref==="OBS-2026-13"?"SSI-2025":o.ref==="OBS-2026-12"?"":(e.lot==="ELEC"?"ELEC-2026":"")}));
 const ALLOBS=()=>EQ.flatMap(e=>e.obs);
-const state={lots:{ELEC:true,CVC:true,ARCHI:true},levels:{RDC:true,R1:true,TT:true},sel:null,room:null,tab:"fiche",xray:true,regFilter:"open",labels:true};
+const state={lots:Object.fromEntries(Object.keys(LOTS).map(k=>[k,true])),regRap:"",levels:{RDC:true,R1:true,TT:true},sel:null,room:null,tab:"fiche",xray:true,regFilter:"open",labels:true};
 
 // ---------- Couleurs ----------
 const css=(v)=>getComputedStyle(document.documentElement).getPropertyValue(v).trim()||"#888";
@@ -509,7 +724,8 @@ function renderKpis(){
    `<div class="kpi"><b>${EQ.filter(e=>!e.kids).length}</b><span>Objets suivis</span></div>`+
    `<div class="kpi ${open?"alert":""}"><b>${open}</b><span>Observations ouvertes</span></div>`+
    `<div class="kpi ${crit?"alert":""}"><b>${crit}</b><span>dont critiques</span></div>`+
-   `<div class="kpi"><b>12/03/26</b><span>Dernière vérif.</span></div>`;
+   `<div class="kpi ${REPORTS.some(r=>repStatus(r)[0]!=="ok")?"alert":""}"><b>${REPORTS.filter(r=>repStatus(r)[0]==="ok").length}/${REPORTS.length}</b><span>Contrôles à jour</span></div>`+
+   `<div class="kpi ${maintOverdue()?"alert":""}"><b>${maintOverdue()}</b><span>Maintenances en retard</span></div>`;
 }
 function renderChips(){
   $("#lots").innerHTML=Object.entries(LOTS).map(([k,l])=>`<button class="chip" type="button" data-lot="${k}" aria-pressed="${state.lots[k]}"><i class="dot" style="background:var(${l.color})"></i>${l.name}</button>`).join("");
@@ -519,7 +735,7 @@ function renderTree(){
   const html=LEVELS.map(L=>{
     const items=EQ.filter(e=>e.level===L.id&&!e.parent);
     const btn=(e,k)=>{const n=openCount(obsOf(e));return `<button type="button" data-eq="${e.id}" aria-current="${state.sel===e.id}"><i class="dot" style="background:var(${LOTS[k].color})"></i>${esc(e.kids?e.name:e.parent?e.room:e.name)}${n?` <span class="badge" title="Observations ouvertes">${n}</span>`:""}<span class="rep">${esc(e.rep)}</span></button>`};
-    const lots=["ELEC","CVC"].map(k=>{const its=items.filter(e=>e.lot===k);if(!its.length)return"";
+    const lots=Object.keys(LOTS).filter(k=>k!=="ARCHI").map(k=>{const its=items.filter(e=>e.lot===k);if(!its.length)return"";
       return `<details open><summary>${LOTS[k].name} <span>${its.length}</span></summary><ul>${its.map(e=>{
         if(!e.kids)return `<li>${btn(e,k)}</li>`;
         const ks=members(e); const op=ks.some(q=>q.id===state.sel);
@@ -591,17 +807,101 @@ function illus(e){
   else if(k==="IfcBoiler") g=`<rect x="110" y="20" width="100" height="160" rx="6" ${P} ${S}/><rect x="128" y="40" width="64" height="26" rx="3" style="fill:${A};opacity:.35"/><circle cx="160" cy="120" r="22" ${S}/><path d="M160 108 c10 12 -10 14 0 24" stroke="${A}" stroke-width="3" fill="none"/>`;
   else if(k==="IfcUnitaryEquipment") g=`<rect x="30" y="60" width="260" height="90" rx="4" ${P} ${S}/><line x1="117" y1="60" x2="117" y2="150" stroke="currentColor" stroke-opacity=".4"/><line x1="203" y1="60" x2="203" y2="150" stroke="currentColor" stroke-opacity=".4"/><circle cx="74" cy="105" r="28" stroke="${A}" stroke-width="3" fill="none"/><circle cx="246" cy="105" r="28" stroke="${A}" stroke-width="3" fill="none"/><path d="M135 80 h50 M135 95 h50 M135 110 h50 M135 125 h50" stroke="${A}" stroke-opacity=".6"/>`;
   else if(k==="IfcFan") g=`<path d="M110 160 L120 80 L200 80 L210 160 Z" ${P} ${S}/><path d="M100 80 Q160 30 220 80 Z" ${P} ${S}/><circle cx="160" cy="120" r="20" stroke="${A}" stroke-width="3" fill="none"/>`;
+  else if(k==="wifi"||k==="det") g=`<ellipse cx="160" cy="80" rx="70" ry="16" ${P} ${S}/><path d="M90 80 v14 a70 16 0 0 0 140 0 v-14" ${P} ${S}/>${k==="wifi"?`<path d="M130 130 a40 40 0 0 1 60 0 M140 142 a25 25 0 0 1 40 0" stroke="${A}" stroke-width="4" fill="none"/><circle cx="160" cy="154" r="5" style="fill:${A}"/>`:`<circle cx="160" cy="98" r="5" style="fill:var(--crit)"/>`}`;
+  else if(k==="dm") g=`<rect x="110" y="40" width="100" height="110" rx="6" style="fill:var(--crit)"/><rect x="128" y="62" width="64" height="58" rx="3" fill="#fff" opacity=".9"/><path d="M140 108 l20 -30 l20 30" stroke="var(--crit)" stroke-width="5" fill="none"/>`;
+  else if(k==="ext") g=`<rect x="138" y="58" width="44" height="122" rx="16" style="fill:var(--crit)"/><rect x="146" y="40" width="28" height="20" rx="3" ${P} ${S}/><path d="M174 46 q36 0 40 40" ${S}/><rect x="146" y="98" width="28" height="40" fill="#fff" opacity=".85"/>`;
+  else if(k==="ballon") g=`<rect x="120" y="20" width="80" height="160" rx="36" ${P} ${S}/><path d="M140 180 v12 M180 180 v12" ${S}/><rect x="150" y="80" width="20" height="40" rx="3" style="fill:${A};opacity:.5"/>`;
+  else if(k==="baie") g=`<rect x="110" y="16" width="100" height="170" rx="3" ${P} ${S}/>${Array.from({length:8},(_,i)=>`<rect x="120" y="${28+i*19}" width="80" height="13" rx="1" style="fill:${A};opacity:${i%3?.25:.6}"/>`).join("")}`;
+  else if(k==="sirene"||k==="diffuseur") g=`<circle cx="160" cy="100" r="46" ${P} ${S}/><circle cx="160" cy="100" r="20" style="fill:${A};opacity:.6"/><path d="M222 70 q16 30 0 60 M236 58 q26 42 0 84" stroke="${A}" stroke-width="4" fill="none"/>`;
+  else if(k==="porte") g=`<rect x="80" y="20" width="160" height="165" ${P} ${S}/><line x1="160" y1="20" x2="160" y2="185" ${S}/><circle cx="150" cy="105" r="4" fill="currentColor"/><circle cx="170" cy="105" r="4" fill="currentColor"/><rect x="152" y="12" width="16" height="10" style="fill:${A}"/>`;
+  else if(k==="compteur"||k==="discon") g=`<path d="M20 110 h280" stroke="${A}" stroke-width="16" stroke-opacity=".45"/><rect x="${k==="compteur"?115:100}" y="70" width="${k==="compteur"?90:120}" height="80" rx="${k==="compteur"?40:8}" ${P} ${S}/>${k==="compteur"?`<circle cx="160" cy="110" r="24" ${S}/><path d="M160 110 l14 -10" ${S}/>`:`<path d="M130 70 v-26 M190 70 v-26 M160 150 v26" ${S}/>`}`;
+  else if(k==="san") g=`<path d="M100 60 h70 v60 q0 40 -35 40 q-35 0 -35 -40 z" ${P} ${S}/><rect x="190" y="70" width="80" height="34" rx="12" ${P} ${S}/><path d="M230 70 v-16 h12" ${S}/>`;
+  else if(k==="bag") g=`<rect x="40" y="70" width="240" height="90" rx="10" ${P} ${S}/><path d="M60 100 h200" stroke="${A}" stroke-width="3" stroke-dasharray="8 6"/><rect x="140" y="50" width="40" height="20" ${S}/>`;
+  else if(k==="inter"||k==="badge"||k==="cmsi") g=`<rect x="${k==="cmsi"?70:120}" y="30" width="${k==="cmsi"?180:80}" height="${k==="cmsi"?140:130}" rx="6" ${P} ${S}/>${k==="cmsi"?Array.from({length:8},(_,i)=>`<circle cx="${95+i*18}" cy="60" r="5" style="fill:${i===2?"var(--crit)":"var(--ok)"}"/>`).join("")+`<rect x="90" y="90" width="140" height="50" rx="3" style="fill:${A};opacity:.2"/>`:k==="inter"?`<rect x="135" y="45" width="50" height="38" rx="3" style="fill:${A};opacity:.35"/><circle cx="160" cy="120" r="10" ${S}/>`:`<rect x="138" y="50" width="44" height="44" rx="4" style="fill:${A};opacity:.3"/>${[0,1,2].map(r=>[0,1,2].map(c=>`<circle cx="${144+c*16}" cy="${112+r*14}" r="4" fill="currentColor" opacity=".5"/>`).join("")).join("")}`}`;
   else g=`<rect x="70" y="60" width="180" height="90" rx="6" ${P} ${S}/><circle cx="160" cy="105" r="18" style="fill:${A};opacity:.5"/>`;
   return `<svg class="illus" viewBox="0 0 320 200" role="img" aria-label="Illustration du type d'équipement ${esc(e.rep)}">${g}<text x="160" y="194" text-anchor="middle" font-size="11" style="fill:var(--muted)" font-family="IBM Plex Mono, monospace">${esc(e.ifc)}</text></svg>`;
 }
 
+// ---------- Photos d'illustration (Wikimedia Commons, licences libres) ----------
+const STOCK=/*STOCK*/{"tgbt": {"src": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Electrical_Distribution_%2822789278665%29.jpg/960px-Electrical_Distribution_%2822789278665%29.jpg", "author": "Carl Lender", "lic": "CC BY 2.0", "page": "https://commons.wikimedia.org/wiki/File:Electrical_Distribution_%2822789278665%29.jpg", "alt": "Electrical Distribution (22789278665)"}, "td": {"src": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Fuse_box_on_hager_components.JPG/960px-Fuse_box_on_hager_components.JPG", "author": "Dmitry G", "lic": "CC BY-SA 3.0", "page": "https://commons.wikimedia.org/wiki/File:Fuse_box_on_hager_components.JPG", "alt": "Fuse box on hager components"}, "cdc": {"src": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/Cabtray_06.jpg/960px-Cabtray_06.jpg", "author": "Leotard", "lic": "CC0", "page": "https://commons.wikimedia.org/wiki/File:Cabtray_06.jpg", "alt": "Cabtray 06"}, "cmsi": {"src": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Fire_alarm_control_panel_VERS-PK_2.jpg/960px-Fire_alarm_control_panel_VERS-PK_2.jpg", "author": "Georg Pik", "lic": "CC0", "page": "https://commons.wikimedia.org/wiki/File:Fire_alarm_control_panel_VERS-PK_2.jpg", "alt": "Fire alarm control panel VERS-PK 2"}, "det": {"src": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Smoke_detector%2C_Russia_%2805%29.jpg/960px-Smoke_detector%2C_Russia_%2805%29.jpg", "author": "Georg Pik", "lic": "CC0", "page": "https://commons.wikimedia.org/wiki/File:Smoke_detector%2C_Russia_%2805%29.jpg", "alt": "Smoke detector, Russia (05)"}, "dm": {"src": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Manual_call_point_1.jpg/960px-Manual_call_point_1.jpg", "author": "Edward Betts", "lic": "Public domain", "page": "https://commons.wikimedia.org/wiki/File:Manual_call_point_1.jpg", "alt": "Manual call point 1"}, "ext": {"src": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Fire_foam_extinguisher_%28h%C3%A5ndslokker%2C_brannslukningsapparat%2C_pulverapparat%2C_skumapparat%2C_type_HOUSEGARD%29_on_wall_in_a_primary_school_in_Eikelandsosen%2C_Fusa%2C_Norway._Also_fire_alarm%2C_sign%2C_fire_blanket_%28brannteppe%29._2018-03-23_A.jpg/960px-thumbnail.jpg", "author": "Wolfmann", "lic": "CC BY-SA 4.0", "page": "https://commons.wikimedia.org/wiki/File:Fire_foam_extinguisher_%28h%C3%A5ndslokker%2C_brannslukningsapparat%2C_pulverapparat%2C_skumapparat%2C_type_HOUSEGARD%29_on_wall_in_a_primary_school_in_Eikelandsosen%2C_Fusa%2C_Norway._Also_fire_alarm%2C_sign%2C_fire_blanket_%28brannteppe%29._2018-03-23_A.jpg", "alt": "Fire foam extinguisher (håndslokker, brannslukningsapparat, pulverapparat, skuma"}, "baes": {"src": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Emergency_exit_UK_007.jpg/960px-Emergency_exit_UK_007.jpg", "author": "HarJIT", "lic": "CC BY 4.0", "page": "https://commons.wikimedia.org/wiki/File:Emergency_exit_UK_007.jpg", "alt": "Emergency exit UK 007"}, "t8": {"src": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Fluorescent_light_strip_2_tube.JPG/960px-Fluorescent_light_strip_2_tube.JPG", "author": "Chetvorno", "lic": "CC0", "page": "https://commons.wikimedia.org/wiki/File:Fluorescent_light_strip_2_tube.JPG", "alt": "Fluorescent light strip 2 tube"}, "chaud": {"src": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Calderacondensaci%C3%B3.JPG/960px-Calderacondensaci%C3%B3.JPG", "author": "Chixoy", "lic": "CC BY-SA 3.0", "page": "https://commons.wikimedia.org/wiki/File:Calderacondensaci%C3%B3.JPG", "alt": "Calderacondensació"}, "cta": {"src": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Air_handling_unit.JPG/960px-Air_handling_unit.JPG", "author": "P199", "lic": "Public domain", "page": "https://commons.wikimedia.org/wiki/File:Air_handling_unit.JPG", "alt": "Air handling unit"}, "tourelle": {"src": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Extractor_fan_12.jpg/960px-Extractor_fan_12.jpg", "author": "Antonio Mette", "lic": "CC BY-SA 4.0", "page": "https://commons.wikimedia.org/wiki/File:Extractor_fan_12.jpg", "alt": "Extractor fan 12"}, "rad": {"src": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Heat_radiator.jpg/960px-Heat_radiator.jpg", "author": "Tiia Monto", "lic": "CC BY-SA 3.0", "page": "https://commons.wikimedia.org/wiki/File:Heat_radiator.jpg", "alt": "Heat radiator"}, "baie": {"src": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Baie_de_brassage.JPG/960px-Baie_de_brassage.JPG", "author": "Arnaud 25", "lic": "CC BY-SA 3.0", "page": "https://commons.wikimedia.org/wiki/File:Baie_de_brassage.JPG", "alt": "Baie de brassage"}, "wifi": {"src": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Wireless_access_point.jpg/960px-Wireless_access_point.jpg", "author": "Pjpearce", "lic": "CC0", "page": "https://commons.wikimedia.org/wiki/File:Wireless_access_point.jpg", "alt": "Wireless access point"}, "inter": {"src": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/Intercom_in_Massy.jpg/960px-Intercom_in_Massy.jpg", "author": "Lionel Allorge", "lic": "CC BY-SA 3.0", "page": "https://commons.wikimedia.org/wiki/File:Intercom_in_Massy.jpg", "alt": "Intercom in Massy"}, "ballon": {"src": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Water_heater_bathroom.JPG/960px-Water_heater_bathroom.JPG", "author": "Mattes", "lic": "Public domain", "page": "https://commons.wikimedia.org/wiki/File:Water_heater_bathroom.JPG", "alt": "Water heater bathroom"}, "discon": {"src": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Fire_backflow_preventer.jpg/960px-Fire_backflow_preventer.jpg", "author": "Mds08011", "lic": "CC BY 4.0", "page": "https://commons.wikimedia.org/wiki/File:Fire_backflow_preventer.jpg", "alt": "Fire backflow preventer"}, "compteur": {"src": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/WMBUS_Water_Meter_for_submetering.jpg/960px-WMBUS_Water_Meter_for_submetering.jpg", "author": "Boutboul", "lic": "CC0", "page": "https://commons.wikimedia.org/wiki/File:WMBUS_Water_Meter_for_submetering.jpg", "alt": "WMBUS Water Meter for submetering"}, "porte": {"src": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Wooden_fire_door_magnet.JPG/960px-Wooden_fire_door_magnet.JPG", "author": "BrokenSphere", "lic": "CC BY-SA 3.0", "page": "https://commons.wikimedia.org/wiki/File:Wooden_fire_door_magnet.JPG", "alt": "Wooden fire door magnet"}, "diffuseur": {"src": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Gent_34203_Sounder.jpg/960px-Gent_34203_Sounder.jpg", "author": "Ps14159", "lic": "CC BY-SA 4.0", "page": "https://commons.wikimedia.org/wiki/File:Gent_34203_Sounder.jpg", "alt": "Gent 34203 Sounder"}, "gaine": {"src": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Air_duct.jpg/960px-Air_duct.jpg", "author": "Mk2010", "lic": "CC BY-SA 3.0", "page": "https://commons.wikimedia.org/wiki/File:Air_duct.jpg", "alt": "Air duct"}, "detgaz": {"src": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Gas_detector.jpg/960px-Gas_detector.jpg", "author": "Cjp24", "lic": "CC BY-SA 3.0", "page": "https://commons.wikimedia.org/wiki/File:Gas_detector.jpg", "alt": "Gas detector"}, "bag": {"src": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/InGroundGreaseTrapParkingLot.JPG/960px-InGroundGreaseTrapParkingLot.JPG", "author": "293.xx.xxx.xx", "lic": "CC BY-SA 3.0", "page": "https://commons.wikimedia.org/wiki/File:InGroundGreaseTrapParkingLot.JPG", "alt": "InGroundGreaseTrapParkingLot"}};
+function stockKey(e){
+  const k=e.kind||"";
+  if(e.ifc==="IfcElectricDistributionBoard")return e.id==="TGBT"?"tgbt":"td";
+  const map={dalle:"dalle",t8:"t8",baes:"baes",rad:"rad",baie:"baie",wifi:"wifi",inter:"inter",badge:"badge",sirene:"sirene",cmsi:"cmsi",det:e.id==="DET-GAZ"?"detgaz":"det",dm:"dm",diffuseur:"diffuseur",porte:"porte",ext:"ext",compteur:"compteur",discon:"discon",ballon:"ballon",san:"san",bag:"bag"};
+  if(map[k])return map[k];
+  return {IfcCableCarrierSegment:"cdc",IfcBoiler:"chaud",IfcUnitaryEquipment:"cta",IfcFan:"tourelle",IfcDuctSegment:"gaine",IfcPipeSegment:e.lot==="PLB"?"tuyau":"tuyau"}[e.ifc]||"";
+}
+const stockOf=e=>STOCK[stockKey(e)]||null;
+
+// ---------- Maintenance ----------
+const MKEY="jumeau-tilleuls-maint-v1";
+let mAdd={}; try{mAdd=JSON.parse(localStorage.getItem(MKEY)||"{}")||{}}catch(e){mAdd={}}
+const mOf=e=>MAINT[e.id]||(e.parent&&MAINT[e.parent])||null;
+const mLog=e=>{const m=mOf(e);const own=(mAdd[e.id]||[]);return own.concat(m?m.log:[]).sort((a,b)=>a[0]<b[0]?1:-1)};
+function mStatus(m){if(!m||!m.next)return ["ok","Sur demande"];const n=days(m.next);return n<0?["crit","En retard de "+(-n)+" j"]:n<=30?["warn","Dans "+n+" j"]:["ok","À jour"]}
+function maintOverdue(){return Object.entries(MAINT).filter(([id,m])=>m.next&&days(m.next)<0).length}
+
+// ---------- Visionneuse de documents ----------
+function openDoc(title,html){
+  let d=$("#docview");
+  if(!d){d=document.createElement("div");d.id="docview";d.setAttribute("role","dialog");d.setAttribute("aria-modal","true");document.body.appendChild(d);
+    d.addEventListener("click",ev=>{if(ev.target===d||ev.target.closest("[data-docclose]"))closeDoc();if(ev.target.closest("[data-docprint]"))window.print()});}
+  d.innerHTML=`<div class="dv-box"><div class="dv-bar"><b>${esc(title)}</b><span class="dv-act"><button type="button" data-docprint="1">Imprimer / PDF</button><button type="button" data-docclose="1" aria-label="Fermer">Fermer</button></span></div><article class="dv-doc">${html}<p class="dv-demo">Document de démonstration Registre Vivant · NT Ingénierie · site, intervenants et organismes fictifs.</p></article></div>`;
+  d.hidden=false;document.body.classList.add("dv-open");d.querySelector("[data-docclose]").focus();
+}
+function closeDoc(){const d=$("#docview");if(d){d.hidden=true;document.body.classList.remove("dv-open")}}
+document.addEventListener("keydown",ev=>{if(ev.key==="Escape"&&$("#docview")&&!$("#docview").hidden){ev.stopImmediatePropagation();closeDoc()}},true);
+const SITE=`<div class="dv-site"><b>Groupe scolaire Les Tilleuls</b> (site fictif) · 12 rue des Tilleuls, 00000 Démoville · ERP type R, 3<sup>e</sup> catégorie · exploitant : commune de Démoville (fictive)</div>`;
+const tbl=(head,rows)=>`<div class="dv-tw"><table class="dv-t"><thead><tr>${head.map(h=>`<th>${esc(h)}</th>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+
+function docFiche(e){
+  const m=mOf(e); const st=stockOf(e); const ph=photos[e.id];
+  const tech=Object.fromEntries(Object.entries(TECH[e.lot+":"+e.ifc]||TECH[e.ifc]||{}).filter(([k])=>!(k in e.props)));
+  const img=ph?`<img src="${ph.d}" alt="">`:st?`<img src="${st.src}" alt="" referrerpolicy="no-referrer" onerror="this.closest('figure').hidden=true"><span class="dv-cap">Photo d'illustration : ${esc(st.author)} · ${esc(st.lic)} · Wikimedia Commons</span>`:"";
+  return `<header class="dv-h"><div><span class="dv-k">Fiche équipement · ${esc(LOTS[e.lot].name)}</span><h1>${esc(e.rep)} · ${esc(e.name)}</h1></div><div class="dv-ref">Réf. RV-TIL-${esc(e.rep)}<br>Mise à jour : ${fdate("2026-10-29")}</div></header>${SITE}
+  <div class="dv-cols"><section><h2>Identification</h2>${tbl(["Champ","Valeur"],[["Repère",esc(e.rep)],["Localisation",esc(LEVELS.find(l=>l.id===e.level).name+" · "+e.room)],["Lot",esc(LOTS[e.lot].name)],["Classe IFC",esc(e.ifc)],["GlobalId IFC",`<code>${esc(e.guid)}</code>`]].concat(e.parent?[["Ensemble",esc(byId[e.parent].rep+" · "+byId[e.parent].name)]]:[]))}</section>${img?`<figure class="dv-fig">${img}</figure>`:""}</div>
+  <h2>Caractéristiques techniques</h2>${tbl(["Caractéristique","Valeur"],Object.entries(e.props).concat(Object.entries(tech)).map(([k,v])=>[esc(k),esc(v)]))}
+  ${e.circuits?`<h2>Départs</h2>${tbl(["Repère","Appareil","Calibre","Courbe","Câble","Destination"],e.circuits.map(c=>c.map(esc)))}`:""}
+  <h2>Maintenance</h2>${m?tbl(["Périodicité","Intervenant","Prochaine échéance"],[[esc(m.per),esc(m.by),esc(fdate(m.next))]]):"<p>Pas de plan de maintenance propre.</p>"}
+  ${mLog(e).length?tbl(["Date","Nature","Compte rendu"],mLog(e).slice(0,8).map(r=>[fdate(r[0]),esc(r[1]),esc(r[2])])):""}
+  <h2>Observations</h2>${obsOf(e).length?tbl(["Réf.","Observation","Action","État"],obsOf(e).map(o=>[o.ref,esc(o.t),esc(o.a),{open:"À lever",prog:"En cours",done:"Levée"}[o.s]])):"<p>Aucune observation en cours ou passée.</p>"}`;
+}
+function docRapport(r){
+  const ol=ALLOBS().filter(o=>o.rap===r.id); const [sc,sl]=repStatus(r);
+  const scope=EQ.filter(e=>!e.parent&&(r.ids?r.ids.includes(e.id):r.lots.includes(e.lot)));
+  return `<header class="dv-h"><div><span class="dv-k">${esc(r.org)}</span><h1>${esc(r.t)}</h1></div><div class="dv-ref">Rapport n° ${esc(r.num)}<br>Intervention du ${fdate(r.date)}</div></header>${SITE}
+  <h2>Cadre de l'intervention</h2>${tbl(["Rubrique","Contenu"],[["Référence réglementaire",esc(r.ref)],["Périodicité",esc(r.per)],["Date de l'intervention",fdate(r.date)],["Prochaine échéance",fdate(r.next)+` <span class="dv-s ${sc}">${sl}</span>`],["Intervenant",esc(r.org)],["Accompagnement","Agent technique de l'exploitant"]])}
+  <h2>Périmètre vérifié</h2>${tbl(["Repère","Équipement","Localisation"],scope.map(e=>[esc(e.rep),esc(e.name),esc(e.room)]))}
+  ${r.mes&&r.mes.length?`<h2>Mesures et essais</h2>${tbl(["Point vérifié","Résultat"],r.mes.map(m=>m.map(esc)))}`:""}
+  <h2>Observations (${ol.length})</h2>${ol.length?tbl(["Réf.","Équipement","Observation","Gravité","Action préconisée","Suivi"],ol.map(o=>[o.ref,esc(byId[o.eq].rep+" · "+byId[o.eq].room),esc(o.t),o.g==="crit"?"<b>Prioritaire</b>":"À traiter",esc(o.a),{open:"À lever",prog:"En cours",done:"Levée"}[o.s]])):"<p>Aucune observation : installation conforme au jour de l'intervention.</p>"}
+  <h2>Conclusion</h2><p>${ol.some(o=>o.g==="crit")?"Des observations prioritaires ont été formulées : elles doivent être levées sans délai et la levée consignée au registre de sécurité.":ol.length?"Installation en état satisfaisant, sous réserve de la levée des observations ci-dessus.":"Installation conforme au jour de l'intervention."}</p>
+  <p class="dv-sig">Le vérificateur (fictif) · signature électronique</p>`;
+}
+function docRegistre(){
+  const rows=REPORTS.map(r=>{const [sc,sl]=repStatus(r);return [esc(r.t),esc(r.ref),esc(r.per),fdate(r.date),fdate(r.next),`<span class="dv-s ${sc}">${sl}</span>`]});
+  return `<header class="dv-h"><div><span class="dv-k">Registre de sécurité · art. R. 143-44 du CCH</span><h1>Vérifications et contrôles réglementaires</h1></div><div class="dv-ref">Édité le ${fdate("2026-10-29")}</div></header>${SITE}
+  ${tbl(["Installation","Référence","Périodicité","Dernière","Prochaine","Statut"],rows)}
+  <h2>Observations non levées</h2>${tbl(["Réf.","Équipement","Observation","Rapport"],ALLOBS().filter(o=>o.s!=="done").map(o=>[o.ref,esc(byId[o.eq].rep),esc(o.t),o.rap?esc(repById[o.rap].num):"Signalement interne"]))}`;
+}
+
 function renderPane(){
   const p=$("#pane"); const e=state.sel?byId[state.sel]:null; const t=state.tab;
+  if(t==="ctrl"){
+    p.innerHTML=`<div class="eq-head"><span class="lot">Registre de sécurité · tous lots</span><h3>Contrôles réglementaires</h3><span class="loc">Échéancier au ${fdate("2026-10-29")} · organismes et intervenants fictifs</span></div>
+      <div class="rel"><button class="chip" type="button" data-docreg="1">Éditer le registre de sécurité</button></div>
+      ${REPORTS.slice().sort((a,b)=>a.next<b.next?-1:1).map(r=>{const [sc,sl]=repStatus(r);const n=ALLOBS().filter(o=>o.rap===r.id&&o.s!=="done").length;
+        return `<div class="ctl ${sc}"><div class="top"><span class="pill ${sc==="crit"?"open":sc==="warn"?"prog":"done"}">${sl}</span><span class="ref">${esc(r.per)} · prochaine : ${fdate(r.next)}</span></div>
+        <p><b>${esc(r.t)}</b></p><div class="act">${esc(r.ref)}</div><div class="act">Dernière intervention : ${fdate(r.date)} · ${esc(r.org)}${n?` · <b>${n} observation${n>1?"s":""} à lever</b>`:""}</div>
+        <div class="row"><button type="button" data-docrap="${r.id}">Ouvrir le rapport</button>${ALLOBS().some(o=>o.rap===r.id)?`<button type="button" data-regrap="${r.id}">Voir les observations</button>`:""}</div></div>`}).join("")}`;
+    return;
+  }
   if(t==="reg"){
-    const f=state.regFilter; const list=ALLOBS().filter(o=>f==="all"?true:f==="done"?o.s==="done":o.s!=="done").sort((a,b)=>(a.g==="crit"?0:1)-(b.g==="crit"?0:1));
-    p.innerHTML=`<div class="eq-head"><span class="lot">Registre de sécurité · électricité et CVC</span><h3>Observations du rapport de vérification</h3><span class="loc">Vérification périodique du 12/03/2026 · organisme agréé (fictif)</span></div>
+    const f=state.regFilter, rr=state.regRap; const list=ALLOBS().filter(o=>(!rr||o.rap===rr)&&(f==="all"?true:f==="done"?o.s==="done":o.s!=="done")).sort((a,b)=>(a.g==="crit"?0:1)-(b.g==="crit"?0:1));
+    p.innerHTML=`<div class="eq-head"><span class="lot">Registre de sécurité · tous lots</span><h3>Observations et signalements</h3><span class="loc">${rr?esc(repById[rr].t)+" du "+fdate(repById[rr].date):"Tous les rapports de contrôle et les signalements internes"}</span></div>
+      <label class="note" for="reg-rap">Origine</label><select id="reg-rap" class="sel"><option value="">Toutes origines</option>${REPORTS.filter(r=>ALLOBS().some(o=>o.rap===r.id)).map(r=>`<option value="${r.id}" ${rr===r.id?"selected":""}>${esc(r.t)} (${fdate(r.date)})</option>`).join("")}</select>
       <div class="reg-filters">${[["open","À lever"],["done","Levées"],["all","Toutes"]].map(([k,l])=>`<button class="chip" type="button" data-reg="${k}" aria-pressed="${f===k}">${l}</button>`).join("")}</div>
       ${list.map(o=>obsHtml(o,true)).join("")||`<div class="empty">Aucune observation dans ce filtre.</div>`}`;
+    $("#reg-rap").addEventListener("change",ev=>{state.regRap=ev.target.value;renderPane()});
     return;
   }
   if(!e&&state.room!=null){
@@ -610,42 +910,48 @@ function renderPane(){
     p.innerHTML=`<div class="eq-head"><span class="lot">Local · IfcSpace</span><h3>${esc(name)}</h3><span class="loc">${esc(LEVELS.find(l=>l.id===lv).name)} · ${Math.round((x1-x0)*(y1-y0))} m²</span></div>
       <div class="rel"><button class="chip" type="button" data-roomexit="1">Quitter le local · revenir au bâtiment</button></div>
       <dl class="props"><dt>Surface</dt><dd>${Math.round((x1-x0)*(y1-y0))} m²</dd><dt>Dimensions</dt><dd>${String(x1-x0).replace(".",",")} × ${String(y1-y0).replace(".",",")} m</dd><dt>Hauteur libre</dt><dd>3,30 m</dd><dt>Objets suivis</dt><dd>${list.length}</dd><dt>Observations ouvertes</dt><dd>${op}</dd></dl>
-      <div class="tree roomlist">${sect("ELEC")+sect("CVC")||`<div class="empty">Aucun équipement suivi dans ce local.</div>`}</div>`;
+      <div class="tree roomlist">${Object.keys(LOTS).filter(k=>k!=="ARCHI").map(sect).join("")||`<div class="empty">Aucun équipement suivi dans ce local.</div>`}</div>`;
     return;
   }
   if(!e){
     p.innerHTML=`<div class="empty"><div class="eq-head"><span class="lot">Aucun équipement sélectionné</span><h3>Choisissez un équipement</h3></div>
       <p>Cliquez sur un objet de la maquette ou de l'arborescence : sa fiche, son unifilaire, ses observations et son QR code s'affichent ici.</p>
       <p>Pour commencer : <button class="chip" type="button" data-eq="TD-R1">TD-R1 · tableau R+1</button> <button class="chip" type="button" data-eq="CTA">CTA-01 · centrale d'air</button></p>
-      <p>L'onglet Registre liste toutes les observations du dernier rapport de vérification.</p></div>`;
+      <p>L'onglet Registre liste les observations de tous les rapports ; l'onglet Contrôles donne l'échéancier réglementaire et ouvre chaque rapport.</p></div>`;
     return;
   }
   const head=`<div class="eq-head"><span class="lot" style="color:var(${LOTS[e.lot].color})"><i class="dot" style="background:var(${LOTS[e.lot].color})"></i>${LOTS[e.lot].name} · ${esc(e.rep)}</span><h3>${esc(e.name)}</h3><span class="loc">${esc(LEVELS.find(l=>l.id===e.level).name)} · ${roomIdx(e.level,e.room)>=0?`<button class="linkbtn" type="button" data-room="${roomIdx(e.level,e.room)}" title="Isoler ce local">${esc(e.room)}</button>`:esc(e.room)}</span></div>`+(state.room!=null?`<div class="rel"><button class="chip" type="button" data-room="${state.room}">← Retour au local ${esc(ROOMS[state.room][1])}</button></div>`:"");
   if(t==="fiche"){
     const props=Object.entries(e.props).concat([["Classe IFC",e.ifc],["GlobalId IFC",e.guid]]);
-    const docs=[];
+    const docs=[["Fiche équipement","PDF","@fiche"]];
     if(e.circuits)docs.push(["Schéma unifilaire","SVG","sld"]);
-    docs.push([photos[e.id]?"Photo de l'équipement":"Photo de l'équipement (à prendre)","JPG","photo"]);
+    docs.push([photos[e.id]?"Photo de l'équipement":stockOf(e)?"Photo d'illustration":"Photo de l'équipement (à prendre)","JPG","photo"]);
+    if(mOf(e))docs.push(["Registre de maintenance","Journal","maint"]);
+    REPORTS.filter(r=>(r.ids?r.ids.includes(e.parent||e.id):r.lots.includes(e.lot))).forEach(r=>docs.push([r.t+" · "+fdate(r.date),"PDF","@"+r.id]));
     if(e.lot==="ELEC"&&e.ifc==="IfcElectricDistributionBoard")docs.push(["Note de calcul NF C 15-100","PDF",""]);
-    if(e.kind==="dalle"||e.kind==="t8"||e.kind==="baes")docs.push(["Fiche technique fabricant","PDF",""]);
-    if(e.lot==="CVC")docs.push(["Notice constructeur","PDF",""],["Carnet d'entretien","PDF",""]);
-    docs.push(["Rapport de vérification 2026","PDF","verif"]);
+    if(["CVC","PLB"].includes(e.lot)&&!e.parent)docs.push(["Notice constructeur","PDF",""]);
     const rel=e.parent?`<div class="rel">Fait partie de <button class="chip" type="button" data-eq="${e.parent}">${esc(byId[e.parent].rep)} · ${esc(byId[e.parent].name)}</button></div>`
       :e.kids?`<div class="rel"><span>Objets unitaires (${e.kids.length}) : chacun a sa fiche, sa photo et son QR code</span><div class="kidgrid">${members(e).map(q=>{const n=openCount(q.obs);return `<button class="chip" type="button" data-eq="${q.id}">${esc(q.rep)}${n?` <span class="badge">${n}</span>`:""}</button>`}).join("")}</div></div>`:"";
     p.innerHTML=head+rel+`<dl class="props">${props.map(([k,v])=>`<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>
       <div class="docs"><h2 style="font-family:var(--f-display);font-size:13px;letter-spacing:.06em;text-transform:uppercase;margin:0;color:var(--muted)">Documents liés</h2>
-      ${docs.map(([n,x,go])=>`<div class="doc"><span class="ext">${x}</span>${esc(n)}${go?`<button type="button" data-tabgo="${go}">Ouvrir</button>`:`<span class="note" style="margin-left:auto">exemple</span>`}</div>`).join("")}</div>`;
+      ${docs.map(([n,x,go])=>`<div class="doc"><span class="ext">${x}</span>${esc(n)}${go?(go[0]==="@"?(go==="@fiche"?`<button type="button" data-docfiche="${e.id}">Ouvrir</button>`:`<button type="button" data-docrap="${go.slice(1)}">Ouvrir</button>`):`<button type="button" data-tabgo="${go}">Ouvrir</button>`):`<span class="note" style="margin-left:auto">exemple</span>`}</div>`).join("")}</div>`;
   } else if(t==="sld"){
     if(!e.circuits){const src=String(e.props["Circuit"]||e.props["Circuits"]||"").split(" ")[0];const bd=byId[src]&&byId[src].circuits?src:"TGBT";
       p.innerHTML=head+`<div class="empty">Pas d'unifilaire propre à cet objet. ${src&&bd===src?`Il est alimenté par ${esc(e.props["Circuit"]||e.props["Circuits"])} :`:"Les unifilaires sont rattachés aux tableaux électriques :"} <button class="chip" type="button" data-eq="${bd}">${esc(byId[bd].rep)}</button></div>`;return}
     p.innerHTML=head+`<div class="sld">${sldSvg(e)}</div><p class="note">Les départs qui alimentent un autre tableau ouvrent ce tableau d'un clic dans l'arborescence.</p>`;
+  } else if(t==="maint"){
+    const m=mOf(e); const [mc,ml]=mStatus(m); const log=mLog(e);
+    p.innerHTML=head+(m?`<dl class="props"><dt>Périodicité</dt><dd>${esc(m.per)}</dd><dt>Intervenant</dt><dd>${esc(m.by)}</dd><dt>Prochaine échéance</dt><dd>${fdate(m.next)} <span class="pill ${mc==="crit"?"open":mc==="warn"?"prog":"done"}">${ml}</span></dd></dl>`:`<div class="empty">Pas de plan de maintenance propre à cet objet.</div>`)+
+      `<h2 class="sub">Journal des interventions <span>${log.length}</span></h2>${log.map(r=>`<div class="mrow"><span class="ref">${fdate(r[0])}</span><span class="pill ${r[1]==="Correctif"?"prog":"done"}">${esc(r[1])}</span><p>${esc(r[2])}</p></div>`).join("")||`<div class="empty">Aucune intervention enregistrée.</div>`}
+      <details class="madd"><summary>Consigner une intervention</summary><form id="m-form"><label>Date <input type="date" name="d" value="2026-10-29" required></label><label>Nature <select name="t"><option>Préventif</option><option>Correctif</option><option>Contrôle</option><option>Relevé</option></select></label><label>Compte rendu <textarea name="c" rows="3" required placeholder="Ce qui a été fait, mesures, pièces remplacées"></textarea></label><button type="submit">Enregistrer</button></form><p class="note">Dans cette démo, l'intervention est gardée dans ce navigateur. Sur la plateforme, le technicien la saisit depuis le QR code de l'équipement.</p></details>`;
+    $("#m-form").addEventListener("submit",ev=>{ev.preventDefault();const f=new FormData(ev.target);(mAdd[e.id]=mAdd[e.id]||[]).push([f.get("d"),f.get("t"),f.get("c")]);try{localStorage.setItem(MKEY,JSON.stringify(mAdd))}catch(err){}renderPane()});
   } else if(t==="verif"){
     const ol=obsOf(e);
     p.innerHTML=head+(ol.length?ol.map(o=>obsHtml(o,!!e.kids)).join(""):`<div class="empty">Aucune observation sur cet équipement lors de la vérification du 12/03/2026.</div>`);
   } else if(t==="photo"){
-    const ph=photos[e.id];
-    p.innerHTML=head+`<figure class="photo">${ph?`<img src="${ph.d}" alt="Photo de ${esc(e.rep)} sur site">`:illus(e)}
-      <figcaption>${ph?`Photo du ${esc(ph.dt)} · enregistrée dans ce navigateur`:`Illustration du type d'équipement · pas encore de photo du site`}</figcaption></figure>
+    const ph=photos[e.id], st=stockOf(e);
+    p.innerHTML=head+`<figure class="photo">${ph?`<img src="${ph.d}" alt="Photo de ${esc(e.rep)} sur site">`:st?`<img src="${st.src}" alt="Photo d'illustration : ${esc(st.alt||e.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><span hidden>${illus(e)}</span>`:illus(e)}
+      <figcaption>${ph?`Photo du ${esc(ph.dt)} · enregistrée dans ce navigateur`:st?`Photo d'illustration (pas l'équipement du site) · ${esc(st.author)} · <a href="${st.page}" target="_blank" rel="noopener">${esc(st.lic)}</a> · Wikimedia Commons`:`Illustration du type d'équipement · pas encore de photo du site`}</figcaption></figure>
       <div class="row"><label class="chip filebtn" tabindex="0">${ph?"Remplacer la photo":"Prendre ou ajouter une photo"}<input type="file" accept="image/*" capture="environment" id="ph-in" hidden></label>${ph?`<button class="chip" type="button" id="ph-del">Supprimer la photo</button>`:""}</div>
       <p class="note" id="ph-msg">Sur téléphone, le bouton ouvre l'appareil photo : le technicien photographie l'équipement sur place et la photo reste attachée à sa fiche. Dans cette démo, elle est gardée dans ton navigateur uniquement.</p>`;
     $("#ph-in").addEventListener("change",ev=>{const f=ev.target.files&&ev.target.files[0];if(f)addPhoto(e.id,f)});
@@ -661,7 +967,7 @@ function renderPane(){
   }
 }
 
-function openRoom(i){state.room=i;state.sel=null;if(sec.mode!=="none"){sec.mode="h";sec.inv=false;$("#sec-mode").value="h";$("#sec-pos").value="100";applySection()}tip.hidden=true;canvas.style.cursor="";if(state.tab==="reg")state.tab="fiche";
+function openRoom(i){state.room=i;state.sel=null;if(sec.mode!=="none"){sec.mode="h";sec.inv=false;$("#sec-mode").value="h";$("#sec-pos").value="100";applySection()}tip.hidden=true;canvas.style.cursor="";if(state.tab==="reg"||state.tab==="ctrl")state.tab="fiche";
   const [lv,name,x0,y0,x1,y1]=ROOMS[i];const z=LEVELS.find(l=>l.id===lv).z;const c=new THREE.Vector3((x0+x1)/2,z+1.2,(y0+y1)/2);const d=Math.max(9,Math.hypot(x1-x0,y1-y0)*1.15);
   const pos=c.clone().add(new THREE.Vector3(-d*.35,d*.8,d*.6));
   applyVisibility();highlight();renderTree();setTab(state.tab);reduce?(camera.position.copy(pos),controls.target.copy(c)):flyTo(pos,c)}
@@ -676,7 +982,7 @@ function select(id,opt){opt=opt||{};state.sel=id;const e=byId[id];
   if(!state.lots[e.lot]){state.lots[e.lot]=true}
   allParts(e).forEach(p=>{state.levels[partLevel(p)]=true});
   renderChips();applyVisibility();highlight();renderTree();
-  if(state.tab==="reg")state.tab="fiche";
+  if(state.tab==="reg"||state.tab==="ctrl")state.tab="fiche";
   setTab(opt.tab||state.tab);
   if(opt.fly!==false)focusEq(id);
 }
@@ -691,10 +997,15 @@ document.addEventListener("click",ev=>{
   else if(b.dataset.tab){setTab(b.dataset.tab)}
   else if(b.dataset.tabgo){setTab(b.dataset.tabgo)}
   else if(b.dataset.reg){state.regFilter=b.dataset.reg;renderPane()}
+  else if(b.dataset.docfiche){const q=byId[b.dataset.docfiche];openDoc("Fiche "+q.rep,docFiche(q))}
+  else if(b.dataset.docrap){const r=repById[b.dataset.docrap];openDoc("Rapport "+r.num,docRapport(r))}
+  else if(b.dataset.docreg){openDoc("Registre de sécurité",docRegistre())}
+  else if(b.dataset.credits){openDoc("Crédits photos",`<header class="dv-h"><div><span class="dv-k">Démonstration</span><h1>Crédits des photos d'illustration</h1></div></header><p>Les photos montrent des équipements du même type que ceux du site fictif, pas les équipements eux-mêmes. Elles proviennent de Wikimedia Commons, sous licence libre.</p>`+tbl(["Équipement","Auteur","Licence","Source"],Object.values(STOCK).map(v=>[esc(v.alt),esc(v.author),esc(v.lic),`<a href="${v.page}" target="_blank" rel="noopener">Wikimedia Commons</a>`])))}
+  else if(b.dataset.regrap){state.regRap=b.dataset.regrap;state.regFilter="all";setTab("reg")}
   else if(b.dataset.st){const o=ALLOBS().find(x=>x.ref===b.dataset.st);o.s=b.dataset.v;saved[o.ref]=o.s;save();renderPane();renderTree();renderKpis()}
 });
 document.addEventListener("click",ev=>{const it=ev.target.closest("[data-goto]");if(it&&!ev.target.closest("button"))select(it.dataset.goto,{tab:"verif"})});
-$("#b-reset").addEventListener("click",()=>{state.sel=null;state.room=null;applyVisibility();highlight();renderTree();if(state.tab!=="reg")renderPane();reduce?(camera.position.copy(C0.pos),controls.target.copy(C0.target)):flyTo(C0.pos.clone(),C0.target.clone())});
+$("#b-reset").addEventListener("click",()=>{state.sel=null;state.room=null;applyVisibility();highlight();renderTree();if(state.tab!=="reg"&&state.tab!=="ctrl")renderPane();reduce?(camera.position.copy(C0.pos),controls.target.copy(C0.target)):flyTo(C0.pos.clone(),C0.target.clone())});
 
 // ---------- coupe ----------
 const sec={on:false,mode:"none",inv:false,plane:new THREE.Plane(new THREE.Vector3(0,-1,0),0)};
