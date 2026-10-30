@@ -137,6 +137,13 @@ figure.photo figcaption{font-size:12px;color:var(--muted);padding:8px 10px;borde
 h2.sub{font-family:var(--f-display);font-size:13px;letter-spacing:.06em;text-transform:uppercase;margin:10px 0 4px;color:var(--muted)}
 h2.sub span{font-family:var(--f-mono);font-weight:400}
 .foot{font-size:11px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap}
+table.mini{width:100%;border-collapse:collapse;font-size:12px}
+table.mini th{text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid var(--line);padding:4px}
+table.mini td{border-bottom:1px solid var(--line);padding:4px;vertical-align:top}
+table.mini tr.hl td,.dasl li.hl{background:color-mix(in srgb,var(--sel) 28%,transparent)}
+.dasl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:12px}
+.dasl li{padding:4px;border-radius:4px}
+.chart{border:1px solid var(--line);border-radius:6px;padding:8px;background:var(--panel-2)}
 .sel{font:inherit;color:var(--fg);background:var(--panel-2);border:1px solid var(--line);border-radius:4px;padding:4px;max-width:100%}
 .ctl{border:1px solid var(--line);border-left:4px solid var(--ok);border-radius:6px;padding:10px 12px;display:flex;flex-direction:column;gap:5px;background:var(--panel-2)}
 .ctl.warn{border-left-color:var(--warn)} .ctl.crit{border-left-color:var(--crit)}
@@ -232,16 +239,7 @@ figure.photo figcaption a{color:inherit}
     </section>
 
     <section class="col side" aria-label="Fiche">
-      <div class="tabs" role="tablist" id="tabs">
-        <button role="tab" id="t-fiche" aria-selected="true" data-tab="fiche" type="button">Fiche</button>
-        <button role="tab" id="t-photo" aria-selected="false" data-tab="photo" type="button">Photo</button>
-        <button role="tab" id="t-sld" aria-selected="false" data-tab="sld" type="button">Unifilaire</button>
-        <button role="tab" id="t-verif" aria-selected="false" data-tab="verif" type="button">Vérifications</button>
-        <button role="tab" id="t-qr" aria-selected="false" data-tab="qr" type="button">QR code</button>
-        <button role="tab" id="t-maint" aria-selected="false" data-tab="maint" type="button">Maintenance</button>
-        <button role="tab" id="t-reg" aria-selected="false" data-tab="reg" type="button">Registre</button>
-        <button role="tab" id="t-ctrl" aria-selected="false" data-tab="ctrl" type="button">Contrôles</button>
-      </div>
+      <div class="tabs" role="tablist" id="tabs"></div>
       <div class="pane" id="pane"></div>
     </section>
   </main>
@@ -395,10 +393,10 @@ eq({id:"PPMS",rep:"PPMS-01",name:"Alarme PPMS (alerte intrusion et confinement)"
 
 // ---------- Sécurité incendie (SSI) ----------
 EQ.find(e=>e.id==="SSI").lot="SSI";
-Object.assign(EQ.find(e=>e.id==="SSI"),{kind:"cmsi",props:{"Catégorie SSI":"A","ECS":"Centrale adressable · 8 zones de détection","CMSI":"2 zones de mise en sécurité (ZS), 2 zones d'alarme (ZA)","Alarme":"Type 1","Asservissements":"Portes coupe-feu, clapets CF-01 à CF-04, arrêt CTA, déverrouillage accès","Alimentation":"AES 24 V · batteries 2 × 12 V 17 Ah (remplacées 2024-09)","Dernier essai":"2026-09-15 · conforme","Mise en service":"2009"}});
+Object.assign(EQ.find(e=>e.id==="SSI"),{kind:"cmsi",props:{"Catégorie SSI":"A","ECS":"Centrale adressable · 5 zones de détection","CMSI":"2 zones de mise en sécurité (ZS), 2 zones d'alarme (ZA)","Alarme":"Type 1","Asservissements":"Portes coupe-feu, clapets CF-01 à CF-04, arrêt CTA, déverrouillage accès","Alimentation":"AES 24 V · batteries 2 × 12 V 17 Ah (remplacées 2024-09)","Dernier essai":"2026-09-15 · conforme","Mise en service":"2009"}});
 eq({id:"DET",rep:"DET",name:"Détecteurs automatiques d'incendie",lot:"SSI",ifc:"IfcSensor",level:"RDC",room:"Circulations et locaux à risques",
   parts:[[6,8,0],[16,8,0],[26,8,0],[36,8,0],[37,3.5,0],[31,3.5,0],[28.5,12.5,0],[5,12.5,0],[6,8,H],[16,8,H],[26,8,H],[36,8,H],[5,12.5,H],[15,12.5,H]].map(([x,y,z])=>({b:[x-.1,y-.1,z+3.2,x+.1,y+.1,z+3.3]})),
-  props:{"Technologie":"Détecteurs ponctuels adressables","Zones":"ZD1 à ZD8"}, obs:[]});
+  props:{"Technologie":"Détecteurs ponctuels adressables","Zones":"ZD1 à ZD5"}, obs:[]});
 eq({id:"DM",rep:"DM",name:"Déclencheurs manuels",lot:"SSI",ifc:"IfcAlarm",level:"RDC",room:"Issues et circulations",
   parts:[[1.2,9.02,0],[39.5,8.98,0],[20.6,8.98,0],[1.2,9.02,H],[39.5,8.98,H]].map(([x,y,z])=>({b:[x-.06,y-.04,z+1.25,x+.06,y+.04,z+1.37]})),
   props:{"Type":"Déclencheurs manuels réarmables, rouges","Hauteur":"1,30 m","Implantation":"À chaque issue et dans les circulations"}, obs:[]});
@@ -479,11 +477,11 @@ explode("DET","DET",(p,i,room,lv)=>{const o=[];
   const typ=room==="Cuisine"?"Thermovélocimétrique adressable":room==="Chaufferie"?"Thermostatique 78 °C adressable":"Optique de fumée adressable";
   if(room==="BCD"&&!detBcd++)o.push({ref:"OBS-2025-32",g:"warn",rap:"SSI-2025",t:"Détecteur encrassé : signal de maintenance remonté par l'ECS.",a:"Nettoyer ou remplacer la tête de détection.",s:"done"});
   return {kind:"det",name:"Détecteur "+(typ.split(" ")[0].toLowerCase())+" · "+room,obs:o,
-  props:{"Type":typ,"Zone":"ZD"+(lv==="R1"?(room==="BCD"||room==="Salle informatique"?"6":"5"):(["Cuisine","Chaufferie","Local TGBT"].includes(room)?"2":room==="Hall / accueil"?"1":"3")),"Adresse":"Boucle 1 · "+pad(i+1),"Hauteur de pose":"3,30 m","Dernier essai":"2026-09-15 · conforme"}}});
+  props:{"Type":typ,"Zone":"ZD"+(lv==="R1"?(room==="BCD"||room==="Salle informatique"?"5":"4"):(["Cuisine","Chaufferie","Local TGBT"].includes(room)?"2":room==="Hall / accueil"?"1":"3")),"Adresse":"Boucle 1 · "+pad(i+1),"Hauteur de pose":"3,30 m","Dernier essai":"2026-09-15 · conforme"}}});
 explode("DM","DM",(p,i,room,lv)=>{const o=[];
   if(i===0)o.push({ref:"OBS-2025-31",g:"crit",rap:"SSI-2025",t:"Déclencheur manuel du hall : membrane cassée et capot de protection absent.",a:"Remplacer la membrane, poser un capot de protection (local accessible aux élèves).",s:"done"});
   return {kind:"dm",name:"Déclencheur manuel · "+room,obs:o,
-  props:{"Type":"Déclencheur manuel à membrane réarmable","Zone":"ZD"+(lv==="R1"?"5":"3"),"Adresse":"Boucle 1 · "+pad(30+i),"Hauteur de pose":"1,30 m","Dernier essai":"2026-09-15 · conforme"}}});
+  props:{"Type":"Déclencheur manuel à membrane réarmable","Zone":"ZD"+(lv==="R1"?"4":"3"),"Adresse":"Boucle 1 · "+pad(30+i),"Hauteur de pose":"1,30 m","Dernier essai":"2026-09-15 · conforme"}}});
 explode("DS","DS",(p,i,room)=>({kind:"diffuseur",name:"Diffuseur sonore · "+room,
   props:{"Type":"Diffuseur sonore non autonome avec flash","Zone d'alarme":"ZA"+(i<2||i===4?"1":"2"),"Niveau sonore":"92 dB(A) à 1 m","Dernier essai":"2026-09-15 · audible dans tous les locaux"}}));
 explode("EXT","EXT",(p,i,room)=>{const T={e:["Eau pulvérisée + additif 6 L","21A-144B"],c:["CO₂ 2 kg","34B"],p:["Poudre ABC 9 kg","43A-233B-C"]}[p.t];
@@ -743,7 +741,7 @@ function renderTree(){
     return `<details open><summary>${L.name}</summary>${lots}</details>`}).join("");
   $("#tree").innerHTML=html;
 }
-function setTab(t){state.tab=t;document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.tab===t)));renderPane()}
+function setTab(t){state.tab=t;renderPane()}
 
 function obsHtml(o,withEq){
   const st={open:["open","À lever"],prog:["prog","En cours"],done:["done","Levée"]}[o.s];
@@ -755,7 +753,7 @@ function obsHtml(o,withEq){
   </div>`;
 }
 
-function sldSvg(e){
+function sldSvg(e,hl){hl=hl||[];
   const fg=css("--fg"),mu=css("--muted"),ac=css("--elec");
   const n=e.circuits.length, w=Math.max(360,70+n*92), h=330, bx=50, by=110, step=(w-100)/Math.max(1,n-1);
   let s=`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" font-family="IBM Plex Mono, monospace" font-size="10">`;
@@ -768,6 +766,7 @@ function sldSvg(e){
   s+=`<text x="${cx+16}" y="92" fill="${mu}">${esc(e.icc||"")}</text>`;
   s+=`<line x1="${bx-10}" y1="${by}" x2="${w-bx+10}" y2="${by}" stroke="${ac}" stroke-width="4"/>`;
   e.circuits.forEach((c,i)=>{const x=n===1?cx:bx+i*step;
+    if(hl.includes(c[0]))s+=`<rect x="${x-38}" y="${by+4}" width="76" height="170" rx="6" fill="${css("--sel")}" fill-opacity=".35"/>`;
     s+=`<line x1="${x}" y1="${by}" x2="${x}" y2="${by+110}" stroke="${fg}" stroke-width="1.5"/>`;
     s+=`<rect x="${x-7}" y="${by+22}" width="14" height="22" fill="none" stroke="${fg}" stroke-width="1.3"/><line x1="${x-7}" y1="${by+44}" x2="${x+7}" y2="${by+22}" stroke="${fg}"/>`;
     s+=`<text x="${x}" y="${by+16}" fill="${fg}" text-anchor="middle" font-weight="600">${esc(c[0])}</text>`;
@@ -884,7 +883,73 @@ function docRegistre(){
   <h2>Observations non levées</h2>${tbl(["Réf.","Équipement","Observation","Rapport"],ALLOBS().filter(o=>o.s!=="done").map(o=>[o.ref,esc(byId[o.eq].rep),esc(o.t),o.rap?esc(repById[o.rap].num):"Signalement interne"]))}`;
 }
 
+// ---------- Onglets adaptés à chaque type d'équipement ----------
+const POWER={"BAIE-VDI":"TD-R1 / D4","ECS":"TD-CUISINE / C2","CH-1":"TD-CHAUFF / H3","CH-2":"TD-CHAUFF / H4","RES-CH":"TD-CHAUFF / H1, H2",
+ "CTA":"TD-CTA / V1, V2, V3","SSI":"TGBT / Q6","PORTIER":"TD-RDC / D5","PPMS":"TD-RDC / D5","DET-GAZ":"TD-CHAUFF / H5","BADGE":"TD-CUISINE / C4"};
+function boardOf(tok){tok=String(tok||"").trim();return EQ.find(q=>q.circuits&&(q.id===tok||q.rep===tok))||null}
+function feedOf(e){
+  const f=e.props["Circuit"]||e.props["Circuits"]||POWER[e.id]||(e.parent&&POWER[e.parent])||e.props["Alimentation"]||"";
+  if(!f)return null; const [tok,rest]=String(f).split(" / "); const bd=boardOf(tok);
+  if(bd)return {board:bd,circ:(rest||"").split(/[ ,]+/).filter(x=>/^[A-Z]\d+$/.test(x)),txt:f};
+  if(/PoE/.test(f))return {poe:true,txt:f};
+  return null;
+}
+// Relevés périodiques (exploitation)
+const MOIS=["nov.","déc.","janv.","févr.","mars","avr.","mai","juin","juil.","août","sept.","oct."];
+const READ={
+ "TGBT":{t:"Puissance maximale atteinte par mois",u:"kVA",lim:[144,"Puissance souscrite 144 kVA"],s:[["Puissance atteinte",[118,131,137,126,109,84,71,62,38,29,74,96]]],src:"Courbe de charge du distributeur (télérelève)"},
+ "ECS":{t:"Températures de l'eau chaude sanitaire",u:"°C",lim:[50,"Seuil bas boucle 50 °C"],s:[["Départ production",[61,60,61,62,60,61,61,60,60,61,61,61]],["Retour de boucle",[52,51,50,49,48,48,53,53,52,53,53,53]]],src:"Relevé mensuel de l'exploitant"},
+ "CPT-EAU":{t:"Consommation d'eau mensuelle",u:"m³",s:[["Consommation",[118,96,121,117,124,98,119,92,14,11,108,121]]],src:"Index du compteur général relevé le 1er du mois"},
+ "CH-1":{t:"Analyse de combustion annuelle",tab:[["2024-09-04","24 ppm","104 %"],["2025-09-03","21 ppm","106 %"],["2026-09-02","18 ppm","108 %"]],th:["Date","CO","Rendement PCI"],src:"Attestations d'entretien annuel"},
+ "CH-2":{t:"Analyse de combustion annuelle",tab:[["2024-09-04","27 ppm","103 %"],["2025-09-03","25 ppm","104 %"],["2026-09-02","22 ppm","105 %"]],th:["Date","CO","Rendement PCI"],src:"Attestations d'entretien annuel"},
+ "CTA":{t:"Perte de charge des filtres de soufflage",u:"Pa",lim:[250,"Remplacement à 250 Pa"],s:[["Filtre ePM1",[118,126,139,152,96,108,121,140,151,168,214,262]]],src:"Pressostat différentiel, relevé mensuel"},
+ "EXT":{t:"État du parc d'extincteurs",tab:[["Eau pulvérisée 6 L","6","2021","2031"],["CO₂ 2 kg","3","2018","2028"],["Poudre ABC 9 kg","1","2021","2031"]],th:["Type","Nombre","Fabrication","Révision 10 ans"],src:"Vérification annuelle du 20/01/2026"},
+ "BAES":{t:"Tests automatiques SATI",tab:[["2026-10-15","Fonctionnel","20/20 OK"],["2026-09-15","Autonomie 1 h","20/20 OK"],["2026-03-15","Autonomie 1 h","18/20 · 2 défauts R+1"]],th:["Date","Test","Résultat"],src:"Bus SATI"}
+};
+const readOf=e=>READ[e.id]||(e.parent&&READ[e.parent])||null;
+function tabsFor(e){
+  if(!e)return [["fiche",state.room!=null?"Local":"Accueil"],["reg","Registre"],["ctrl","Contrôles"]];
+  const t=[["fiche","Fiche"],["photo","Photo"]];
+  if(e.circuits)t.push(["sld","Unifilaire"]); else if(feedOf(e))t.push(["sld","Alimentation"]);
+  if(["SSI","DET","DM","DS","PCF"].includes(e.parent||e.id))t.push(["ssi","Synoptique SSI"]);
+  if(readOf(e))t.push(["rel","Relevés"]);
+  if(mOf(e))t.push(["maint","Maintenance"]);
+  t.push(["verif","Observations"],["qr","QR code"],["reg","Registre"],["ctrl","Contrôles"]);
+  return t;
+}
+function renderTabs(){
+  const e=state.sel?byId[state.sel]:null; const ts=tabsFor(e);
+  if(!ts.some(([k])=>k===state.tab))state.tab="fiche";
+  const el=$("#tabs"); el.innerHTML=ts.map(([k,l])=>`<button role="tab" id="t-${k}" aria-selected="${state.tab===k}" data-tab="${k}" type="button">${l}</button>`).join("");
+}
+function lineChart(R){
+  const fg=css("--fg"),mu=css("--muted"),cols=[css("--elec"),css("--cvc"),css("--plb")];
+  const W=340,H=180,l=38,r=8,tp=14,b=26; const all=R.s.flatMap(x=>x[1]).concat(R.lim?[R.lim[0]]:[]);
+  let mx=Math.max(...all)*1.1, mn=Math.min(0,...all); if(R.u==="°C"){mn=40;mx=66}
+  const X=i=>l+i*(W-l-r)/11, Y=v=>tp+(H-tp-b)*(1-(v-mn)/(mx-mn));
+  let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${esc(R.t)}" font-family="IBM Plex Mono, monospace" font-size="9">`;
+  for(let k=0;k<=4;k++){const v=mn+(mx-mn)*k/4;s+=`<line x1="${l}" x2="${W-r}" y1="${Y(v)}" y2="${Y(v)}" stroke="${mu}" stroke-opacity=".25"/><text x="${l-4}" y="${Y(v)+3}" text-anchor="end" fill="${mu}">${Math.round(v)}</text>`}
+  MOIS.forEach((m,i)=>{if(i%2===0)s+=`<text x="${X(i)}" y="${H-8}" text-anchor="middle" fill="${mu}">${m}</text>`});
+  if(R.lim)s+=`<line x1="${l}" x2="${W-r}" y1="${Y(R.lim[0])}" y2="${Y(R.lim[0])}" stroke="${css("--crit")}" stroke-dasharray="4 3"/><text x="${W-r}" y="${Y(R.lim[0])-4}" text-anchor="end" fill="${css("--crit")}">${esc(R.lim[1])}</text>`;
+  R.s.forEach(([n,v],j)=>{s+=`<polyline fill="none" stroke="${cols[j]}" stroke-width="2" points="${v.map((y,i)=>X(i)+","+Y(y)).join(" ")}"/>`+v.map((y,i)=>`<circle cx="${X(i)}" cy="${Y(y)}" r="2.4" fill="${cols[j]}"><title>${MOIS[i]} : ${y} ${R.u}</title></circle>`).join("")});
+  s+=`<text x="${l}" y="9" fill="${fg}">${esc(R.u)}</text></svg>`;
+  return s+`<div class="note">${R.s.map(([n],j)=>`<span style="color:${cols[j]}">━</span> ${esc(n)}`).join(" · ")} · 12 derniers mois</div>`;
+}
+function ssiHtml(e){
+  const kids=id=>members(byId[id]);
+  const zd={};kids("DET").concat(kids("DM")).forEach(q=>{const z=q.props["Zone"];(zd[z]=zd[z]||{det:0,dm:0,loc:new Set(),ids:[]});q.id.startsWith("DM")?zd[z].dm++:zd[z].det++;zd[z].loc.add(q.room);zd[z].ids.push(q.id)});
+  const za={};kids("DS").forEach(q=>{const z=q.props["Zone d'alarme"];(za[z]=za[z]||[]).push(q)});
+  const mine=new Set(members(e).map(q=>q.id));
+  const das=[["PCF","Porte coupe-feu R+1 (ventouses)","Fermeture"],["GAINES","Clapets coupe-feu CF-01 à CF-04","Fermeture"],["CTA","Centrale de traitement d'air","Arrêt"],["PORTIER","Ventouse de l'entrée","Déverrouillage"],["BADGE","Porte de livraison de la cuisine","Déverrouillage"]];
+  return `<p class="note">Système de sécurité incendie de catégorie A · ECS adressable + CMSI · ${Object.keys(zd).length} zones de détection, ${Object.keys(za).length} zones d'alarme.</p>
+  <h2 class="sub">Zones de détection</h2><table class="mini"><tr><th>Zone</th><th>Locaux</th><th>DAD</th><th>DM</th></tr>${Object.keys(zd).sort().map(z=>`<tr class="${zd[z].ids.some(i=>mine.has(i))?"hl":""}"><td>${z}</td><td>${esc([...zd[z].loc].join(", "))}</td><td>${zd[z].det}</td><td>${zd[z].dm}</td></tr>`).join("")}</table>
+  <h2 class="sub">Zones d'alarme</h2><table class="mini"><tr><th>Zone</th><th>Diffuseurs</th></tr>${Object.keys(za).sort().map(z=>`<tr class="${za[z].some(q=>mine.has(q.id))?"hl":""}"><td>${z}</td><td>${za[z].map(q=>esc(q.rep+" · "+q.room)).join("<br>")}</td></tr>`).join("")}</table>
+  <h2 class="sub">Dispositifs actionnés de sécurité (DAS)</h2><ul class="dasl">${das.map(([id,n,a])=>`<li class="${mine.has(id)?"hl":""}"><button class="chip" type="button" data-eq="${id}">${esc(byId[id].rep)}</button> ${esc(n)} · <b>${a}</b> sur alarme</li>`).join("")}</ul>
+  <div class="rel"><button class="chip" type="button" data-eq="SSI">CMSI · centralisateur</button></div>`;
+}
+
 function renderPane(){
+  renderTabs();
   const p=$("#pane"); const e=state.sel?byId[state.sel]:null; const t=state.tab;
   if(t==="ctrl"){
     p.innerHTML=`<div class="eq-head"><span class="lot">Registre de sécurité · tous lots</span><h3>Contrôles réglementaires</h3><span class="loc">Échéancier au ${fdate("2026-10-29")} · organismes et intervenants fictifs</span></div>
@@ -936,9 +1001,16 @@ function renderPane(){
       <div class="docs"><h2 style="font-family:var(--f-display);font-size:13px;letter-spacing:.06em;text-transform:uppercase;margin:0;color:var(--muted)">Documents liés</h2>
       ${docs.map(([n,x,go])=>`<div class="doc"><span class="ext">${x}</span>${esc(n)}${go?(go[0]==="@"?(go==="@fiche"?`<button type="button" data-docfiche="${e.id}">Ouvrir</button>`:`<button type="button" data-docrap="${go.slice(1)}">Ouvrir</button>`):`<button type="button" data-tabgo="${go}">Ouvrir</button>`):`<span class="note" style="margin-left:auto">exemple</span>`}</div>`).join("")}</div>`;
   } else if(t==="sld"){
-    if(!e.circuits){const src=String(e.props["Circuit"]||e.props["Circuits"]||"").split(" ")[0];const bd=byId[src]&&byId[src].circuits?src:"TGBT";
-      p.innerHTML=head+`<div class="empty">Pas d'unifilaire propre à cet objet. ${src&&bd===src?`Il est alimenté par ${esc(e.props["Circuit"]||e.props["Circuits"])} :`:"Les unifilaires sont rattachés aux tableaux électriques :"} <button class="chip" type="button" data-eq="${bd}">${esc(byId[bd].rep)}</button></div>`;return}
+    if(!e.circuits){const f=feedOf(e);
+      if(f&&f.board){p.innerHTML=head+`<dl class="props"><dt>Alimenté par</dt><dd>${esc(f.txt)}</dd></dl><p class="note">Départ surligné sur l'unifilaire du tableau :</p><div class="sld">${sldSvg(f.board,f.circ)}</div><div class="rel"><button class="chip" type="button" data-eq="${f.board.id}">Ouvrir le tableau ${esc(f.board.rep)}</button></div>`;return}
+      if(f&&f.poe){p.innerHTML=head+`<dl class="props"><dt>Alimentation</dt><dd>${esc(f.txt)}</dd></dl><p class="note">Alimenté par le câble réseau (PoE) depuis le commutateur de la baie de brassage.</p><div class="rel"><button class="chip" type="button" data-eq="BAIE-VDI">BAIE-01 · baie de brassage</button></div>`;return}
+      p.innerHTML=head+`<div class="empty">Équipement non alimenté électriquement.</div>`;return}
     p.innerHTML=head+`<div class="sld">${sldSvg(e)}</div><p class="note">Les départs qui alimentent un autre tableau ouvrent ce tableau d'un clic dans l'arborescence.</p>`;
+  } else if(t==="ssi"){
+    p.innerHTML=head+ssiHtml(e);
+  } else if(t==="rel"){
+    const R=readOf(e);
+    p.innerHTML=head+`<h2 class="sub">${esc(R.t)}</h2>`+(R.s?`<div class="chart">${lineChart(R)}</div>`:"")+(R.tab?`<table class="mini"><tr>${R.th.map(h=>`<th>${esc(h)}</th>`).join("")}</tr>${R.tab.map(r=>`<tr>${r.map((c,i)=>`<td>${i===0&&/^\d{4}-/.test(c)?fdate(c):esc(c)}</td>`).join("")}</tr>`).join("")}</table>`:"")+`<p class="note">Source : ${esc(R.src)}. ${e.parent?`Relevés communs à l'ensemble ${esc(byId[e.parent].rep)}.`:""}</p>`;
   } else if(t==="maint"){
     const m=mOf(e); const [mc,ml]=mStatus(m); const log=mLog(e);
     p.innerHTML=head+(m?`<dl class="props"><dt>Périodicité</dt><dd>${esc(m.per)}</dd><dt>Intervenant</dt><dd>${esc(m.by)}</dd><dt>Prochaine échéance</dt><dd>${fdate(m.next)} <span class="pill ${mc==="crit"?"open":mc==="warn"?"prog":"done"}">${ml}</span></dd></dl>`:`<div class="empty">Pas de plan de maintenance propre à cet objet.</div>`)+
