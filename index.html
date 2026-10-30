@@ -507,6 +507,10 @@ const REPORTS=[
   mes:[["Départ de production","61 °C"],["Retour de boucle","53 °C"],["Point de puisage le plus éloigné","51 °C"]]}
 ];
 const repById=Object.fromEntries(REPORTS.map(r=>[r.id,r]));
+const SSI_IDS=["SSI","DET","DM","DS","PCF","GAINES"];
+const REP_SCOPE={"ELEC-2026":e=>e.lot==="ELEC","SSI-2025":e=>SSI_IDS.includes(e.parent||e.id),"SSI-MAINT":e=>SSI_IDS.includes(e.parent||e.id),
+ "GAZ-2026":e=>e.lot==="CVC","EXT-2026":e=>(e.parent||e.id)==="EXT","BA-2026":e=>e.id==="DISC","ECS-2026":e=>e.id==="ECS"};
+const repsFor=e=>REPORTS.filter(r=>REP_SCOPE[r.id](e));
 const days=d=>Math.round((new Date(d)-TODAY)/864e5);
 const repStatus=r=>{const n=days(r.next);return n<0?["crit","En retard"]:n<=30?["warn","À planifier"]:["ok","À jour"]};
 const fdate=d=>d?d.split("-").reverse().join("/"):"—";
@@ -747,7 +751,7 @@ function obsHtml(o,withEq){
   const st={open:["open","À lever"],prog:["prog","En cours"],done:["done","Levée"]}[o.s];
   const e=byId[o.eq];
   return `<div class="obs ${o.s==="done"?"done":o.g==="crit"?"crit":""} ${withEq?"reg-item":""}" ${withEq?`data-goto="${o.eq}"`:""}>
-    <div class="top"><span class="ref">${o.ref}</span><span class="pill ${st[0]}">${st[1]}</span>${o.g==="crit"&&o.s!=="done"?`<span class="pill open">Prioritaire</span>`:""}${withEq?`<span class="ref">${esc(e.rep)} · ${esc(e.room)}</span>`:""}</div>
+    <div class="top"><span class="ref">${o.ref}</span><span class="pill ${st[0]}">${st[1]}</span>${o.g==="crit"&&o.s!=="done"?`<span class="pill open">Prioritaire</span>`:""}${withEq?`<span class="ref">${esc(e.rep)} · ${esc(e.room)}</span>`:`<span class="ref">${o.rap?"Rapport "+esc(repById[o.rap].num)+" du "+fdate(repById[o.rap].date):"Signalement interne"}</span>`}</div>
     <p>${esc(o.t)}</p><div class="act">Action : ${esc(o.a)}</div>
     ${withEq?"":`<div class="row"><button type="button" data-st="${o.ref}" data-v="${o.s==="done"?"open":"done"}">${o.s==="done"?"Rouvrir":"Marquer levée"}</button>${o.s==="open"?`<button type="button" data-st="${o.ref}" data-v="prog">Passer en cours</button>`:""}</div>`}
   </div>`;
@@ -867,7 +871,7 @@ function docFiche(e){
 }
 function docRapport(r){
   const ol=ALLOBS().filter(o=>o.rap===r.id); const [sc,sl]=repStatus(r);
-  const scope=EQ.filter(e=>!e.parent&&(r.ids?r.ids.includes(e.id):r.lots.includes(e.lot)));
+  const scope=EQ.filter(e=>!e.parent&&REP_SCOPE[r.id](e));
   return `<header class="dv-h"><div><span class="dv-k">${esc(r.org)}</span><h1>${esc(r.t)}</h1></div><div class="dv-ref">Rapport n° ${esc(r.num)}<br>Intervention du ${fdate(r.date)}</div></header>${SITE}
   <h2>Cadre de l'intervention</h2>${tbl(["Rubrique","Contenu"],[["Référence réglementaire",esc(r.ref)],["Périodicité",esc(r.per)],["Date de l'intervention",fdate(r.date)],["Prochaine échéance",fdate(r.next)+` <span class="dv-s ${sc}">${sl}</span>`],["Intervenant",esc(r.org)],["Accompagnement","Agent technique de l'exploitant"]])}
   <h2>Périmètre vérifié</h2>${tbl(["Repère","Équipement","Localisation"],scope.map(e=>[esc(e.rep),esc(e.name),esc(e.room)]))}
@@ -914,7 +918,9 @@ function tabsFor(e){
   if(["SSI","DET","DM","DS","PCF"].includes(e.parent||e.id))t.push(["ssi","Synoptique SSI"]);
   if(readOf(e))t.push(["rel","Relevés"]);
   if(mOf(e))t.push(["maint","Maintenance"]);
-  t.push(["verif","Observations"],["qr","QR code"],["reg","Registre"],["ctrl","Contrôles"]);
+  t.push(["verif","Observations"]);
+  if(repsFor(e).length)t.push(["ctrl","Contrôles"]);
+  t.push(["qr","QR code"]);
   return t;
 }
 function renderTabs(){
@@ -948,16 +954,19 @@ function ssiHtml(e){
   <div class="rel"><button class="chip" type="button" data-eq="SSI">CMSI · centralisateur</button></div>`;
 }
 
+function ctlCard(r,e){const [sc,sl]=repStatus(r);
+  const obs=ALLOBS().filter(o=>o.rap===r.id&&(!e||members(e).some(q=>q.id===o.eq)));const n=obs.filter(o=>o.s!=="done").length;
+  return `<div class="ctl ${sc}"><div class="top"><span class="pill ${sc==="crit"?"open":sc==="warn"?"prog":"done"}">${sl}</span><span class="ref">${esc(r.per)} · prochaine : ${fdate(r.next)}</span></div>
+  <p><b>${esc(r.t)}</b></p><div class="act">${esc(r.ref)}</div><div class="act">Dernière intervention : ${fdate(r.date)} · ${esc(r.org)}</div>
+  ${e?`<div class="act">${obs.length?`${obs.length} observation${obs.length>1?"s":""} sur cet équipement${n?`, <b>${n} à lever</b>`:", toutes levées"}`:"Aucune observation sur cet équipement"}</div>`:(n?`<div class="act"><b>${n} observation${n>1?"s":""} à lever</b></div>`:"")}
+  <div class="row"><button type="button" data-docrap="${r.id}">Ouvrir le rapport</button>${e?(obs.length?`<button type="button" data-tabgo="verif">Voir les observations</button>`:""):(ALLOBS().some(o=>o.rap===r.id)?`<button type="button" data-regrap="${r.id}">Voir les observations</button>`:"")}</div></div>`}
 function renderPane(){
   renderTabs();
   const p=$("#pane"); const e=state.sel?byId[state.sel]:null; const t=state.tab;
-  if(t==="ctrl"){
+  if(t==="ctrl"&&!e){
     p.innerHTML=`<div class="eq-head"><span class="lot">Registre de sécurité · tous lots</span><h3>Contrôles réglementaires</h3><span class="loc">Échéancier au ${fdate("2026-10-29")} · organismes et intervenants fictifs</span></div>
       <div class="rel"><button class="chip" type="button" data-docreg="1">Éditer le registre de sécurité</button></div>
-      ${REPORTS.slice().sort((a,b)=>a.next<b.next?-1:1).map(r=>{const [sc,sl]=repStatus(r);const n=ALLOBS().filter(o=>o.rap===r.id&&o.s!=="done").length;
-        return `<div class="ctl ${sc}"><div class="top"><span class="pill ${sc==="crit"?"open":sc==="warn"?"prog":"done"}">${sl}</span><span class="ref">${esc(r.per)} · prochaine : ${fdate(r.next)}</span></div>
-        <p><b>${esc(r.t)}</b></p><div class="act">${esc(r.ref)}</div><div class="act">Dernière intervention : ${fdate(r.date)} · ${esc(r.org)}${n?` · <b>${n} observation${n>1?"s":""} à lever</b>`:""}</div>
-        <div class="row"><button type="button" data-docrap="${r.id}">Ouvrir le rapport</button>${ALLOBS().some(o=>o.rap===r.id)?`<button type="button" data-regrap="${r.id}">Voir les observations</button>`:""}</div></div>`}).join("")}`;
+      ${REPORTS.slice().sort((a,b)=>a.next<b.next?-1:1).map(r=>ctlCard(r)).join("")}`;
     return;
   }
   if(t==="reg"){
@@ -992,7 +1001,7 @@ function renderPane(){
     if(e.circuits)docs.push(["Schéma unifilaire","SVG","sld"]);
     docs.push([photos[e.id]?"Photo de l'équipement":stockOf(e)?"Photo d'illustration":"Photo de l'équipement (à prendre)","JPG","photo"]);
     if(mOf(e))docs.push(["Registre de maintenance","Journal","maint"]);
-    REPORTS.filter(r=>(r.ids?r.ids.includes(e.parent||e.id):r.lots.includes(e.lot))).forEach(r=>docs.push([r.t+" · "+fdate(r.date),"PDF","@"+r.id]));
+    repsFor(e).forEach(r=>docs.push([r.t+" · "+fdate(r.date),"PDF","@"+r.id]));
     if(e.lot==="ELEC"&&e.ifc==="IfcElectricDistributionBoard")docs.push(["Note de calcul NF C 15-100","PDF",""]);
     if(["CVC","PLB"].includes(e.lot)&&!e.parent)docs.push(["Notice constructeur","PDF",""]);
     const rel=e.parent?`<div class="rel">Fait partie de <button class="chip" type="button" data-eq="${e.parent}">${esc(byId[e.parent].rep)} · ${esc(byId[e.parent].name)}</button></div>`
@@ -1006,6 +1015,8 @@ function renderPane(){
       if(f&&f.poe){p.innerHTML=head+`<dl class="props"><dt>Alimentation</dt><dd>${esc(f.txt)}</dd></dl><p class="note">Alimenté par le câble réseau (PoE) depuis le commutateur de la baie de brassage.</p><div class="rel"><button class="chip" type="button" data-eq="BAIE-VDI">BAIE-01 · baie de brassage</button></div>`;return}
       p.innerHTML=head+`<div class="empty">Équipement non alimenté électriquement.</div>`;return}
     p.innerHTML=head+`<div class="sld">${sldSvg(e)}</div><p class="note">Les départs qui alimentent un autre tableau ouvrent ce tableau d'un clic dans l'arborescence.</p>`;
+  } else if(t==="ctrl"){
+    p.innerHTML=head+`<p class="note">Contrôles réglementaires qui portent sur cet équipement.</p>`+repsFor(e).sort((a,b)=>a.next<b.next?-1:1).map(r=>ctlCard(r,e)).join("");
   } else if(t==="ssi"){
     p.innerHTML=head+ssiHtml(e);
   } else if(t==="rel"){
